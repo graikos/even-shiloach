@@ -56,7 +56,7 @@ int main()
     add_edge(4, 5, G);
     add_vertex(G);
     add_vertex(G);
-    add_edge(6, 7, G);
+    add_edge(7, 6, G);
 
     // DynGraph DG(G);
     // DG.print();
@@ -70,16 +70,22 @@ int main()
     //     std::cout << k->first << " " << k->second << std::endl;
     // }
 
-    my::StepScanDFS sdfs(G, 6);
-    while (sdfs.state != my::StepScanState::Finished)
+    // my::StepScanDFS sdfs(G, 6, 7);
+    // while (sdfs.state != my::StepScanState::Finished)
+    // {
+    //     sdfs.advance();
+    // }
+    // std::cout << "result: " << sdfs.result << std::endl;
+    // printList(sdfs.component);
+
+    my::StepDetectBreak sd(G, 5, 7);
+
+    while (sd.state != my::StepDetectBreakState::Finished)
     {
-        sdfs.advance();
+        sd.advance();
     }
-    std::cout << "result: " << sdfs.result << std::endl;
-    printList(sdfs.component);
-
-
-
+    std::cout << "Component breaks? " <<  sd.component_breaks << std::endl;
+    printList(sd.small_component);
 
     return 0;
 }

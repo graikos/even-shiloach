@@ -12,7 +12,7 @@ namespace my
     void dfs(const Graph &G, Vertex s, std::vector<int> &comp, int comp_val);
     bool dfs_scan(const Graph &G, Vertex s, Vertex t);
 
-    enum StepScanState
+    enum class StepScanState
     {
         Uninitialized,
         Examine_new_vertex,
@@ -26,12 +26,12 @@ namespace my
     public:
         // result will hold the final return value of the algorithm execution once it reaches a finished state
         bool result;
-        // target_mode being true means scan will stop when a specified target is reached. In this case, no track of
-        // connected component is kept
+        // target_mode being true means scan will stop when a specified target is reached. Meanwhile, the connected component is kept
+        // in case target is not found. If target is found, the contents of the component should be disregarded.
         bool target_mode;
         // state tracks the current state of the execution to determine next step
         StepScanState state;
-        // list of vertices in this connected component. Only applicable if algorithm is not running in target mode
+        // list of vertices in this connected component.
         std::list<Vertex> component;
 
         // scans until vertex t is found, does not keep track of component
@@ -62,12 +62,29 @@ namespace my
 
     void circuit_free_update_components(const Graph &G, Vertex u, Vertex v, std::vector<int> &comps, int new_comp_val);
 
+    enum class StepDetectBreakState
+    {
+        Uninitialized,
+        FirstBranch,
+        SecondBranch,
+        Finished
+    };
+
     class StepDetectBreak
     {
+    public:
+        bool component_breaks;
+        StepDetectBreakState state;
+        std::list<Vertex> small_component;
+
         StepDetectBreak(const Graph &G, Vertex u, Vertex v);
+
+        void advance();
 
     private:
         const Graph &_G;
+        StepScanDFS sdfs1;
+        StepScanDFS sdfs2;
     };
 
 }
