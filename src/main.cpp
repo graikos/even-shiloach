@@ -1,6 +1,8 @@
 #include <iostream>
 #include "graph.hpp"
 #include <vector>
+#include "algo.hpp"
+#include "dyn_graph.hpp"
 
 using namespace boost;
 
