@@ -58,8 +58,40 @@ void DynGraph::init()
         // if current vertex is not part of an existing connected component, it has not been discovered
         if (_levels[i] < 0)
         {
+            // the root of this new component will be artificially connected to the random root
+            // will be on level 1 and an artificial edge will be added
             my::bfs(_G, s, _levels, _components, ++_component_max_idx, 1);
+            _add_artificial_edge(_r, i);
         }
+    }
+}
+
+void DynGraph::_add_artificial_edge(Vertex v, Vertex u)
+{
+    // artificial edges will be kept in a hash map, with key the min of the two and value the max of the two
+    std::cout << "Adding" << std::endl;
+    _artificial_edges[(v < u) ? v : u] = (v >= u) ? v : u;
+}
+
+void DynGraph::_remove_artificial_edge(Vertex v, Vertex u)
+{
+    auto k = _artificial_edges.find((v < u) ? v : u);
+    if (k != _artificial_edges.end())
+    {
+        _artificial_edges.erase(k);
+    }
+}
+
+bool DynGraph::_check_if_artificially_connected(Vertex v, Vertex u)
+{
+    try
+    {
+        _artificial_edges.at((v < u) ? v : u);
+        return true;
+    }
+    catch (const std::out_of_range &e)
+    {
+        return false;
     }
 }
 

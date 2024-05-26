@@ -25,6 +25,7 @@ public:
 
     std::vector<int> _levels;
     std::vector<int> _components;
+    std::unordered_map<Vertex, Vertex> _artificial_edges; // TODO: remove
 
     DynGraph(Graph &G);
     void init();
@@ -33,8 +34,12 @@ public:
 private:
     Graph &_G;
     Vertex _r;
-    std::unordered_map<Vertex, Vertex> _artificial_edges;
+    // std::unordered_map<Vertex, Vertex> _artificial_edges;
     int _component_max_idx;
+
+    void _add_artificial_edge(Vertex v, Vertex u);
+    void _remove_artificial_edge(Vertex v, Vertex u);
+    bool _check_if_artificially_connected(Vertex v, Vertex u);
 };
 
 namespace my

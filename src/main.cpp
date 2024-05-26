@@ -54,5 +54,10 @@ int main()
     std::cout << std::endl;
     printVector(DG._components);
 
+    for (auto k = DG._artificial_edges.begin(); k != DG._artificial_edges.end(); ++k)
+    {
+        std::cout << k->first << " " << k->second << std::endl;
+    }
+
     return 0;
 }

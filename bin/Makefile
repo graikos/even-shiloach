@@ -1,7 +1,7 @@
 INCL = '../incl'
 CC = g++
 
-DEBUG ?= 1
+DEBUG ?= 0
 
 CFLAGS = -std=c++0x
 
