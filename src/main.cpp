@@ -30,6 +30,15 @@ void printVector(const std::vector<T> &vec)
     }
 }
 
+template <typename T>
+void printList(const std::list<T> &list)
+{
+    for (auto it = list.begin(); it != list.end(); ++it)
+    {
+        std::cout << *it << std::endl;
+    }
+}
+
 int main()
 {
 
@@ -49,17 +58,28 @@ int main()
     add_vertex(G);
     add_edge(6, 7, G);
 
-    DynGraph DG(G);
-    DG.print();
+    // DynGraph DG(G);
+    // DG.print();
 
-    printVector(DG._levels);
-    std::cout << std::endl;
-    printVector(DG._components);
+    // printVector(DG._levels);
+    // std::cout << std::endl;
+    // printVector(DG._components);
 
-    for (auto k = DG._artificial_edges.begin(); k != DG._artificial_edges.end(); ++k)
+    // for (auto k = DG._artificial_edges.begin(); k != DG._artificial_edges.end(); ++k)
+    // {
+    //     std::cout << k->first << " " << k->second << std::endl;
+    // }
+
+    my::StepScanDFS sdfs(G, 6);
+    while (sdfs.state != my::StepScanState::Finished)
     {
-        std::cout << k->first << " " << k->second << std::endl;
+        sdfs.advance();
     }
+    std::cout << "result: " << sdfs.result << std::endl;
+    printList(sdfs.component);
+
+
+
 
     return 0;
 }
