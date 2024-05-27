@@ -3,24 +3,29 @@
 
 void EdgeSet::add_edge(Vertex u, Vertex v)
 {
-    _internal_map[(u < v) ? u : v] = (u >= v) ? u : v;
+    Vertex mn = (u < v) ? u : v;
+    Vertex mx = (u >= v) ? u : v;
+    _internal_set.insert(std::make_pair(mn, mx));
 }
 
 bool EdgeSet::remove_edge(Vertex u, Vertex v)
 {
-    auto k = _internal_map.find((u < v) ? u : v);
-    if (k == _internal_map.end())
+    Vertex mn = (u < v) ? u : v;
+    Vertex mx = (u >= v) ? u : v;
+
+    auto k = _internal_set.find(std::make_pair(mn,mx));
+    if (k == _internal_set.end())
     {
         return false;
     }
 
-    _internal_map.erase(k);
+    _internal_set.erase(k);
     return true;
 }
 
 bool EdgeSet::empty()
 {
-    return _internal_map.empty();
+    return _internal_set.empty();
 }
 
 EdgeSet &EdgeSet::operator=(EdgeSet &&other)
@@ -30,17 +35,17 @@ EdgeSet &EdgeSet::operator=(EdgeSet &&other)
     {
         return *this;
     }
-    _internal_map.clear();
+    _internal_set.clear();
     // transfer the internal map
-    _internal_map = std::move(other._internal_map);
+    _internal_set = std::move(other._internal_set);
     // clear the map of the other edge set, essentially leaving it empty again
-    other._internal_map.clear();
+    other._internal_set.clear();
     return *this;
 }
 
 void EdgeSet::print()
 {
-    for (auto k = _internal_map.begin(); k != _internal_map.end(); ++k)
+    for (auto k = _internal_set.begin(); k != _internal_set.end(); ++k)
     {
         std::cout << "("<< k->first << "," << k->second << ")" << "\t";
     }

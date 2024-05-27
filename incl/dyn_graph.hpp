@@ -9,10 +9,10 @@ class DynGraph
 public:
     std::vector<int> _levels;
     std::vector<int> _components;
-    std::unordered_map<Vertex, Vertex> _artificial_edges; // TODO: remove
-    std::vector<EdgeSet> alpha;                           // TODO: remove
-    std::vector<EdgeSet> beta;                            // TODO: remove
-    std::vector<EdgeSet> gamma;                           // TODO: remove
+    std::unordered_map<Vertex, Vertex> _artificial_edges; // TODO: move to private
+    std::vector<EdgeSet> alpha;                           // TODO: move to private
+    std::vector<EdgeSet> beta;                            // TODO: move to private
+    std::vector<EdgeSet> gamma;                           // TODO: move to private
 
     DynGraph(Graph &G);
     void init();
