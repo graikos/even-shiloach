@@ -26,8 +26,9 @@ void printVector(const std::vector<T> &vec)
 {
     for (auto it = vec.begin(); it != vec.end(); ++it)
     {
-        std::cout << *it << std::endl;
+        std::cout << *it << " ";
     }
+    std::cout << std::endl;
 }
 
 template <typename T>
@@ -58,17 +59,41 @@ int main()
     add_vertex(G);
     add_edge(7, 6, G);
 
-    // DynGraph DG(G);
-    // DG.print();
+    DynGraph DG(G);
+    DG.print();
 
-    // printVector(DG._levels);
-    // std::cout << std::endl;
-    // printVector(DG._components);
+    printVector(DG._levels);
+    std::cout << std::endl;
+    printVector(DG._components);
 
-    // for (auto k = DG._artificial_edges.begin(); k != DG._artificial_edges.end(); ++k)
-    // {
-    //     std::cout << k->first << " " << k->second << std::endl;
-    // }
+    std::cout << "Artificial Edges: " << std::endl;
+    for (auto k = DG._artificial_edges.begin(); k != DG._artificial_edges.end(); ++k)
+    {
+        std::cout << k->first << " " << k->second << "\t";
+    }
+    std::cout << std::endl;
+
+    std::cout << "Printing alpha: " << std::endl;
+    for (auto i = 0; i < DG.alpha.size(); ++i)
+    {
+        std::cout << "Vertex: " << i << std::endl;
+        DG.alpha[i].print();
+    }
+
+    std::cout << "Printing beta: " << std::endl;
+    for (auto i = 0; i < DG.beta.size(); ++i)
+    {
+        std::cout << "Vertex: " << i << std::endl;
+        DG.beta[i].print();
+    }
+
+    std::cout << "Printing gamma: " << std::endl;
+    for (auto i = 0; i < DG.gamma.size(); ++i)
+    {
+        std::cout << "Vertex: " << i << std::endl;
+        DG.gamma[i].print();
+    }
+
 
     // my::StepScanDFS sdfs(G, 6, 7);
     // while (sdfs.state != my::StepScanState::Finished)
@@ -78,14 +103,14 @@ int main()
     // std::cout << "result: " << sdfs.result << std::endl;
     // printList(sdfs.component);
 
-    my::StepDetectBreak sd(G, 5, 7);
+    // my::StepDetectBreak sd(G, 5, 7);
 
-    while (sd.state != my::StepDetectBreakState::Finished)
-    {
-        sd.advance();
-    }
-    std::cout << "Component breaks? " <<  sd.component_breaks << std::endl;
-    printList(sd.small_component);
+    // while (sd.state != my::StepDetectBreakState::Finished)
+    // {
+    //     sd.advance();
+    // }
+    // std::cout << "Component breaks? " <<  sd.component_breaks << std::endl;
+    // printList(sd.small_component);
 
     return 0;
 }

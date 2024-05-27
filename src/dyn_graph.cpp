@@ -5,6 +5,7 @@
 #include <boost/random/mersenne_twister.hpp>
 #include "dyn_graph.hpp"
 #include "algo.hpp"
+#include "edge_set.hpp"
 
 using namespace boost;
 
@@ -18,6 +19,10 @@ void DynGraph::init()
 
     _levels = std::vector<int>(num_vertices(_G), -1);
     _components = std::vector<int>(num_vertices(_G), -1);
+    // initialze edge sets for each vertex
+    alpha = std::vector<EdgeSet>(num_vertices(_G));
+    beta = std::vector<EdgeSet>(num_vertices(_G));
+    gamma = std::vector<EdgeSet>(num_vertices(_G));
 
     // pick random vertex as root
     mt19937 mt(std::time(0));
@@ -25,7 +30,7 @@ void DynGraph::init()
     std::cout << "Picked as root: " << _r << std::endl;
 
     // perform initial BFS from root r
-    my::bfs(_G, _r, _levels, _components, _component_max_idx);
+    my::bfs(_G, _r, _levels, _components, _component_max_idx, alpha, beta, gamma);
 
     for (std::size_t i = 0; i < _levels.size(); ++i)
     {
@@ -35,8 +40,11 @@ void DynGraph::init()
         {
             // the root of this new component will be artificially connected to the random root
             // will be on level 1 and an artificial edge will be added
-            my::bfs(_G, s, _levels, _components, ++_component_max_idx, 1);
+            my::bfs(_G, s, _levels, _components, ++_component_max_idx, alpha, beta, gamma, 1);
             _add_artificial_edge(_r, i);
+            // also add artifical edges to appropriate edge sets
+            alpha[i].add_edge(_r, i);
+            gamma[_r].add_edge(_r, i);
         }
     }
 }

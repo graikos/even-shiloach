@@ -5,7 +5,11 @@
 
 using namespace boost;
 
-void my::bfs(const Graph &G, Vertex s, std::vector<int> &levels, std::vector<int> &comp, int comp_val, int levels_offset)
+void my::bfs(const Graph &G, Vertex s, std::vector<int> &levels, std::vector<int> &comp, int comp_val,
+             std::vector<EdgeSet> &alpha,
+             std::vector<EdgeSet> &beta,
+             std::vector<EdgeSet> &gamma,
+             int levels_offset)
 {
     std::queue<Vertex> q;
     levels[s] = levels_offset;
@@ -25,6 +29,30 @@ void my::bfs(const Graph &G, Vertex s, std::vector<int> &levels, std::vector<int
                 q.push(v);
                 levels[v] = levels[u] + 1;
                 comp[v] = comp_val;
+                // here we know that the edge (u,v) will be in alpha(v) and gamma(u)
+                alpha[v].add_edge(u, v);
+                gamma[u].add_edge(u, v);
+                continue;
+            }
+
+            // here we know that the vertex has already been discovered
+            // it remains to check what's their level relation
+            // due to BGL out_edges, which will show both (u,v) and (v,u), the insertions below will run two times
+            // for each edge, but the set will correctly insert them only once
+            if (levels[u] < levels[v])
+            {
+                alpha[v].add_edge(u, v);
+                gamma[u].add_edge(u, v);
+            }
+            else if (levels[u] == levels[v])
+            {
+                beta[v].add_edge(u, v);
+                beta[u].add_edge(u, v);
+            }
+            else
+            {
+                alpha[u].add_edge(u, v);
+                gamma[v].add_edge(u, v);
             }
         }
     }

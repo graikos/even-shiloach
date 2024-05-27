@@ -5,10 +5,20 @@
 #include <stack>
 #include <list>
 #include <unordered_set>
+#include <unordered_map>
+#include "edge_set.hpp"
 
 namespace my
 {
-    void bfs(const Graph &G, Vertex s, std::vector<int> &levels, std::vector<int> &comp, int comp_val, int levels_offset = 0);
+    // bfs performs the BFS algorithm and keeps track of the levels, starting with a root level of "levels_offset". It
+    // also marks the component discovered and keeps track of edge sets (unordered_map) for each vertex to the previous (alpha), current(beta),
+    // and next (gamma) levels.
+    void bfs(const Graph &G, Vertex s, std::vector<int> &levels, std::vector<int> &comp, int comp_val,
+             std::vector<EdgeSet> &alpha,
+             std::vector<EdgeSet> &beta,
+             std::vector<EdgeSet> &gamma,
+             int levels_offset = 0);
+
     void dfs(const Graph &G, Vertex s, std::vector<int> &comp, int comp_val);
     bool dfs_scan(const Graph &G, Vertex s, Vertex t);
 
@@ -70,6 +80,9 @@ namespace my
         Finished
     };
 
+    // StepDetectBreak implements a step-by-step version of the "parallel" process to check whether by removing an edge (u,v) a connected component breaks.
+    // If it does, the smallest of the two newly created components is saved as "small_component". The caller can use that to update the component name.
+    // If it does not, the "coomponent_breaks" variable is false and no small_component is set.
     class StepDetectBreak
     {
     public:

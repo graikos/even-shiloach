@@ -12,8 +12,8 @@ else
 endif
 
 
-dyn_connected: main.o graph.o dyn_graph.o algo.o
-	$(CC) $(CFLAGS) -o dyn_connected main.o graph.o dyn_graph.o algo.o -I $(INCL)
+dyn_connected: main.o graph.o dyn_graph.o algo.o edge_set.o
+	$(CC) $(CFLAGS) -o dyn_connected main.o graph.o dyn_graph.o algo.o edge_set.o -I $(INCL)
 
 main.o: ../src/main.cpp
 	$(CC) $(CFLAGS) -c $^ -I $(INCL)
@@ -25,6 +25,9 @@ dyn_graph.o: ../src/dyn_graph.cpp
 	$(CC) $(CFLAGS) -c $^ -I $(INCL)
 
 algo.o: ../src/algo.cpp
+	$(CC) $(CFLAGS) -c $^ -I $(INCL)
+
+edge_set.o: ../src/edge_set.cpp
 	$(CC) $(CFLAGS) -c $^ -I $(INCL)
 
 run:
