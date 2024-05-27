@@ -18,6 +18,8 @@ struct vertex_pair_hash
     }
 };
 
+typedef std::unordered_set<std::pair<Vertex, Vertex>, vertex_pair_hash>::iterator EdgeSetIterator;
+
 class EdgeSet
 {
 public:
@@ -28,7 +30,9 @@ public:
     void add_edge(Vertex u, Vertex v);
     bool remove_edge(Vertex u, Vertex v);
     bool empty();
-
+    Vertex other_end(EdgeSetIterator it, Vertex v);
+    EdgeSetIterator begin();
+    EdgeSetIterator end();
     void print();
 
 private:

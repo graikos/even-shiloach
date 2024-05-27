@@ -293,3 +293,203 @@ void my::StepDetectBreak::advance()
         return;
     }
 }
+
+my::StepDetectNotBreak::StepDetectNotBreak(std::vector<int> &levels, std::vector<EdgeSet> &alpha, std::vector<EdgeSet> &beta,
+                                           std::vector<EdgeSet> &gamma, std::stack<int> &changes_stack,
+                                           Vertex u, Vertex v) : _levels(levels), _alpha(alpha), _beta(beta), _gamma(gamma), _u(u), _v(v), component_breaks(false), _changes_stack(changes_stack)
+{
+    _init();
+}
+
+void my::StepDetectNotBreak::_init()
+{
+    state = StepDetectNotBreakState::InitialCheckLevels;
+}
+
+/*
+ enum class StepDetectNotBreakState
+    {
+        Uninitialized,
+        InitialCheckLevels,
+        InitialDifferentLevels,
+        InitLevelAvalanche,
+        AvalancheStep1_2_3,
+        AvalancheStep4,
+        AvalancheStep5,
+        AvalancheStep6,
+        AvalancheStep7,
+        AvalancheStep8,
+        Finished
+    };
+*/
+
+void my::StepDetectNotBreak::advance()
+{
+    switch (state)
+    {
+    case StepDetectNotBreakState::InitialCheckLevels:
+        if (_levels[_u] == _levels[_v])
+        {
+            std::cout << "Endpoints were at the same level." << std::endl;
+            // same level means component does not break
+            // remove edge from beta sets of each
+            _beta[_u].remove_edge(_u, _v);
+            _beta[_v].remove_edge(_u, _v);
+
+            state = StepDetectNotBreakState::Finished;
+            component_breaks = false;
+            return;
+        }
+        std::cout << "Moving to initial different levels." << std::endl;
+        state = StepDetectNotBreakState::InitialDifferentLevels;
+        return;
+
+    case StepDetectNotBreakState::InitialDifferentLevels:
+
+        if (_levels[_v] < _levels[_u])
+        {
+            // make _u be the one with the smaller level of the two
+            // to avoid slips and checks further along
+            std::swap(_v, _u);
+        }
+
+        _gamma[_u].remove_edge(_u, _v);
+        _alpha[_v].remove_edge(_u, _v);
+
+        if (!_alpha[_v].empty())
+        {
+            std::cout << "alpha(v) not empty; component did not break" << std::endl;
+            // components have not changed
+            state = StepDetectNotBreakState::Finished;
+            component_breaks = false;
+            return;
+        }
+
+        state = StepDetectNotBreakState::InitLevelAvalanche;
+        return;
+
+    case StepDetectNotBreakState::InitLevelAvalanche:
+
+        std::cout << "Init avalanche" << std::endl;
+        _Q.push(_v);
+        state = StepDetectNotBreakState::AvalancheStep1_2_3;
+        return;
+
+    case StepDetectNotBreakState::AvalancheStep1_2_3:
+
+        // check if process should stop because of empty queue
+        if (_Q.empty())
+        {
+            std::cout << "queue is empty; finished" << std::endl;
+            component_breaks = false;
+            state = StepDetectNotBreakState::Finished;
+            return;
+        }
+
+        // pop queue
+        _current_w = _Q.front();
+        _Q.pop();
+        std::cout << "Popped: " << _current_w << std::endl;
+
+        // increase popped vertex level
+        ++_levels[_current_w];
+
+        _current_esi = _beta[_current_w].begin();
+
+        // proceed to avalanche
+        state = StepDetectNotBreakState::AvalancheStep4;
+        return;
+
+    case StepDetectNotBreakState::AvalancheStep4:
+    {
+        if (_current_esi == _beta[_current_w].end())
+        {
+            std::cout << "Step 4: all edges examined" << std::endl;
+            // iterated through all of beta(w) edges, move to next step
+            state = StepDetectNotBreakState::AvalancheStep5;
+            return;
+        }
+
+        // for the current examined edge in b(w), get its other end (w')
+        Vertex w_prime = _beta[_current_w].other_end(_current_esi, _current_w);
+        // remove current edge from beta(w') and insert into gamma(w')
+        _beta[w_prime].remove_edge(_current_w, w_prime);
+        _gamma[w_prime].add_edge(_current_w, w_prime);
+
+        std::cout << "Step 4: Examined edge: (" << _current_w << "," << w_prime << ")" << std::endl;
+
+        // continue with next edge in beta(w)
+        ++_current_esi;
+        return;
+    }
+
+    case StepDetectNotBreakState::AvalancheStep5:
+
+        std::cout << "Step 5" << std::endl;
+        // transfer beta(w) to alpha(w), beta(w) is now empty
+        _alpha[_current_w] = std::move(_beta[_current_w]);
+
+        // initialize edge iterator for gamma(w)
+        _current_esi = _gamma[_current_w].begin();
+        state = StepDetectNotBreakState::AvalancheStep6;
+
+        return;
+
+    case StepDetectNotBreakState::AvalancheStep6:
+    {
+        if (_current_esi == _gamma[_current_w].end())
+        {
+            std::cout << "Step 6: examined all edges" << std::endl;
+            // iterated through all of gamma(w) edges
+            state = StepDetectNotBreakState::AvalancheStep7;
+            return;
+        }
+
+        Vertex w_prime = _gamma[_current_w].other_end(_current_esi, _current_w);
+        _alpha[w_prime].remove_edge(w_prime, _current_w);
+        _beta[w_prime].add_edge(w_prime, _current_w);
+        std::cout << "Step 6: examined edge: (" << _current_w << "," << w_prime << ")" << std::endl;
+
+        if (_alpha[w_prime].empty())
+        {
+            std::cout << "alpha(w') found emtpy; pushing w_prime to queue" << std::endl;
+            _Q.push(w_prime);
+        }
+
+        ++_current_esi;
+        return;
+    }
+
+    case StepDetectNotBreakState::AvalancheStep7:
+
+        // transfer gamma(w) to beta(w)
+        // gamma(w) is emptied inside the move
+        _beta[_current_w] = std::move(_gamma[_current_w]);
+        std::cout << "Step 7" << std::endl;
+
+        state = StepDetectNotBreakState::AvalancheStep8;
+
+        return;
+
+    case StepDetectNotBreakState::AvalancheStep8:
+
+        std::cout << "Step 8" << std::endl;
+        if (_alpha[_current_w].empty())
+        {
+            std::cout << "Step 8: alpha(w) is still empty, pushing again" << std::endl;
+            // alpha(w) is still empty, push to queue again
+            _Q.push(_current_w);
+        }
+
+        state = StepDetectNotBreakState::AvalancheStep1_2_3;
+
+        return;
+
+    case StepDetectNotBreakState::Uninitialized:
+        _init();
+        return;
+    case StepDetectNotBreakState::Finished:
+    default:
+        return;
+    }
+}

@@ -43,6 +43,21 @@ EdgeSet &EdgeSet::operator=(EdgeSet &&other)
     return *this;
 }
 
+EdgeSetIterator EdgeSet::begin()
+{
+    return _internal_set.begin();
+}
+
+EdgeSetIterator EdgeSet::end()
+{
+    return _internal_set.end();
+}
+
+Vertex EdgeSet::other_end(EdgeSetIterator it, Vertex v)
+{
+    return (it->first == v)? it->second: it->first;
+}
+
 void EdgeSet::print()
 {
     for (auto k = _internal_set.begin(); k != _internal_set.end(); ++k)

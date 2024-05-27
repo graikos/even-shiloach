@@ -2,11 +2,13 @@
 #define ALGO_HPP
 
 #include "graph.hpp"
+#include "edge_set.hpp"
 #include <stack>
+#include <queue>
 #include <list>
 #include <unordered_set>
 #include <unordered_map>
-#include "edge_set.hpp"
+#include <vector>
 
 namespace my
 {
@@ -83,6 +85,7 @@ namespace my
     // StepDetectBreak implements a step-by-step version of the "parallel" process to check whether by removing an edge (u,v) a connected component breaks.
     // If it does, the smallest of the two newly created components is saved as "small_component". The caller can use that to update the component name.
     // If it does not, the "coomponent_breaks" variable is false and no small_component is set.
+    // This is labeled as Process A in the paper.
     class StepDetectBreak
     {
     public:
@@ -98,6 +101,56 @@ namespace my
         const Graph &_G;
         StepScanDFS sdfs1;
         StepScanDFS sdfs2;
+    };
+
+    enum class StepDetectNotBreakState
+    {
+        Uninitialized,
+        InitialCheckLevels,
+        InitialDifferentLevels,
+        InitLevelAvalanche,
+        AvalancheStep1_2_3,
+        AvalancheStep4,
+        AvalancheStep5,
+        AvalancheStep6,
+        AvalancheStep7,
+        AvalancheStep8,
+        Finished
+    };
+
+    class StepDetectNotBreak
+    {
+    public:
+        bool component_breaks;
+        StepDetectNotBreakState state;
+
+        StepDetectNotBreak() = default;
+        StepDetectNotBreak(std::vector<int> &levels,
+                           std::vector<EdgeSet> &alpha,
+                           std::vector<EdgeSet> &beta,
+                           std::vector<EdgeSet> &gamma,
+                           std::stack<int> &changes_stack,
+                           Vertex u, Vertex v);
+
+        void advance();
+
+    private:
+        std::stack<int> &_changes_stack; // TODO: change int
+
+        std::queue<Vertex> _Q;
+
+        Vertex _u;
+        Vertex _v;
+
+        std::vector<int> &_levels;
+        std::vector<EdgeSet> &_alpha;
+        std::vector<EdgeSet> &_beta;
+        std::vector<EdgeSet> &_gamma;
+
+        Vertex _current_w;
+        EdgeSetIterator _current_esi;
+
+        void _init();
     };
 
 }

@@ -43,21 +43,37 @@ void printList(const std::list<T> &list)
 int main()
 {
 
+    // Graph G;
+    // add_vertex(G);
+    // add_vertex(G);
+    // add_vertex(G);
+    // add_vertex(G);
+    // add_vertex(G);
+    // add_vertex(G);
+    // add_edge(0, 1, G);
+    // add_edge(0, 2, G);
+    // add_edge(2, 3, G);
+    // add_edge(2, 4, G);
+    // add_edge(4, 5, G);
+    // add_vertex(G);
+    // add_vertex(G);
+    // add_edge(7, 6, G);
+
     Graph G;
     add_vertex(G);
     add_vertex(G);
     add_vertex(G);
     add_vertex(G);
-    add_vertex(G);
-    add_vertex(G);
-    add_edge(0, 1, G);
-    add_edge(0, 2, G);
+    Edge e;
+    bool created;
+    tie(e, created) = add_edge(0, 1, G);
+    add_edge(1, 2, G);
     add_edge(2, 3, G);
-    add_edge(2, 4, G);
-    add_edge(4, 5, G);
+    add_edge(3, 0, G);
+
     add_vertex(G);
     add_vertex(G);
-    add_edge(7, 6, G);
+    tie(e, created) = add_edge(4, 5, G);
 
     DynGraph DG(G);
     DG.print();
@@ -65,6 +81,8 @@ int main()
     printVector(DG._levels);
     std::cout << std::endl;
     printVector(DG._components);
+
+    std::stack<int> stacky;
 
     std::cout << "Artificial Edges: " << std::endl;
     for (auto k = DG._artificial_edges.begin(); k != DG._artificial_edges.end(); ++k)
@@ -94,6 +112,21 @@ int main()
         DG.gamma[i].print();
     }
 
+    remove_edge(e, G);
+    my::StepDetectNotBreak sdnb(DG._levels, DG.alpha, DG.beta, DG.gamma, stacky, source(e, G), target(e, G));
+
+    std::cout << "===============" << std::endl;
+
+    while (sdnb.state != my::StepDetectNotBreakState::Finished)
+    {
+        sdnb.advance();
+    }
+
+    std::cout << "component breaks?: " << sdnb.component_breaks << std::endl;
+    std::cout << "===============" << std::endl;
+
+    std::cout << "levels: " << std::endl;
+    printVector(DG._levels);
 
     // my::StepScanDFS sdfs(G, 6, 7);
     // while (sdfs.state != my::StepScanState::Finished)
