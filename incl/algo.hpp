@@ -109,6 +109,7 @@ namespace my
         Insert,
         Remove,
         AlphaBetaMove,
+        RestoreBeta,
         BetaGammaMove,
         GammaEmptyMove,
     };

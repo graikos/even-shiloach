@@ -26,7 +26,10 @@ void DynGraph::init()
 
     // pick random vertex as root
     mt19937 mt(std::time(0));
-    _r = vertex(mt() % num_vertices(_G), _G);
+    // TODO: Change back after debug
+    // _r = vertex(mt() % num_vertices(_G), _G);
+    _r = vertex(1, _G);
+
     std::cout << "Picked as root: " << _r << std::endl;
 
     // perform initial BFS from root r
@@ -84,6 +87,8 @@ void DynGraph::print()
 void DynGraph::_rewind()
 {
 
+    std::cout << "rewinding" << std::endl;
+
     std::vector<std::vector<EdgeSet> *> s = {&alpha, &beta, &gamma};
 
     while (!_change_history.empty())
@@ -94,20 +99,38 @@ void DynGraph::_rewind()
         switch (record.type)
         {
         case my::ChangeRecordType::LevelBump:
+            std::cout << "Rewinding level bump" << std::endl;
 
             // undo the level increase of v
             --_levels[record.v];
             break;
 
         case my::ChangeRecordType::Insert:
+            std::cout << "rewinding insert" << std::endl;
             (*(s[record.primary_set]))[record.v].remove_edge(record.v, record.u);
             break;
 
         case my::ChangeRecordType::Remove:
+            std::cout << "rewinding remove" << std::endl;
             (*(s[record.primary_set]))[record.v].add_edge(record.v, record.u);
             break;
 
+        case my::ChangeRecordType::RestoreBeta:
+
+            std::cout << "rewinding restore beta" << std::endl;
+
+            // this is restoring beta(w), which is invalidate with the move inside step 5
+            // in step 5 beta(w) is moved to alpha(w). During rewinding, if we only rewind
+            // alpha to its old set, beta(w) will be left invalid, with a possibility of not being
+            // overwritten, if execution does not make it to step 7. It is guaranteed due to the order of the
+            // stack that the next entry will restore alpha(w), so no problem with this move
+            beta[record.v] = std::move(alpha[record.v]);
+
+            break;
+
         case my::ChangeRecordType::AlphaBetaMove:
+
+            std::cout << "rewinding alpha beta move" << std::endl;
 
             // undo the alpha(w) <- beta(w)
             // the old alpha is kept
@@ -115,38 +138,42 @@ void DynGraph::_rewind()
 
             break;
 
-        case my::ChangeRecordType::BetaGammaMove:
+        // case my::ChangeRecordType::BetaGammaMove:
+        //     std::cout << "rewinding beta gamma move" << std::endl;
 
-            // undo the beta(w) <- gamma(w)
-            // to do that, use the current alpha(w)
-            // This will work because we use a stack, meaning we traverse the avalanche steps in reverse
-            // This means that we have not yet changed alpha(w) back to the old one, meaning at this step
-            // alpha(w) holds the old beta(w) still.
-            // Also, there is the issue of moving alpha(w) to beta(w), thus invalidating the current alpha(w),
-            // running the risk of leaving the alpha(w) set as undefined in the new version of the dyn_graph.
-            // This CANNOT happen because there is nothing between step 7 to step 5 that could break the execution of
-            // process B, thus leaving alpha(w) unchanged, which will happen at step 5.
-            // Also, in step 6 no changes are made to alpha(w).
-            // Essentially, if we find ourselves in this step, rewinding the beta(w) <- gamma(w) move, we will certainly
-            // rewind the alpha(w) <- beta(w) move too, thus setting the momentarily undefined alpha(w) back to its
-            // old version.
+        //     // undo the beta(w) <- gamma(w)
+        //     // to do that, use the current alpha(w)
+        //     // This will work because we use a stack, meaning we traverse the avalanche steps in reverse
+        //     // This means that we have not yet changed alpha(w) back to the old one, meaning at this step
+        //     // alpha(w) holds the old beta(w) still.
+        //     // Also, there is the issue of moving alpha(w) to beta(w), thus invalidating the current alpha(w),
+        //     // running the risk of leaving the alpha(w) set as undefined in the new version of the dyn_graph.
+        //     // This CANNOT happen because there is nothing between step 7 to step 5 that could break the execution of
+        //     // process B, thus leaving alpha(w) unchanged, which will happen at step 5.
+        //     // Also, in step 6 no changes are made to alpha(w).
+        //     // Essentially, if we find ourselves in this step, rewinding the beta(w) <- gamma(w) move, we will certainly
+        //     // rewind the alpha(w) <- beta(w) move too, thus setting the momentarily undefined alpha(w) back to its
+        //     // old version.
 
-            beta[record.v] = std::move(alpha[record.v]);
+        //     beta[record.v] = std::move(alpha[record.v]);
 
-            break;
+        //     break;
 
-        case my::ChangeRecordType::GammaEmptyMove:
+        // case my::ChangeRecordType::GammaEmptyMove:
 
-            // similary, this takes place before the previous rewind, so
-            // beta(w) will still have the old value of gamma(w)
+        //     std::cout << "rewinding gamma empty move" << std::endl;
 
-            gamma[record.v] = std::move(beta[record.v]);
-            break;
+        //     // similary, this takes place before the previous rewind, so
+        //     // beta(w) will still have the old value of gamma(w)
+
+        //     gamma[record.v] = std::move(beta[record.v]);
+        //     break;
 
         default:
             continue;
         }
     }
+    std::cout << "Done" << std::endl;
 }
 
 void DynGraph::dyn_remove_edge(Edge e)
@@ -197,10 +224,15 @@ void DynGraph::dyn_remove_edge(Edge e)
             gamma[u].add_edge(u, v);
             alpha[v].add_edge(u, v);
 
+            std::cout << "Process A detected break" << std::endl;
+
             break;
         }
         procB.advance();
     }
+    // after each run, empty change history
+    // NOTE: this takes O(N) to delete all elements
+    _change_history ={};
 }
 
 bool DynGraph::query_is_connected(Vertex v, Vertex u)

@@ -298,6 +298,22 @@ my::StepDetectNotBreak::StepDetectNotBreak(std::vector<int> &levels, std::vector
                                            std::vector<EdgeSet> &gamma, std::stack<ChangeRecord> &changes_stack,
                                            Vertex u, Vertex v) : _levels(levels), _alpha(alpha), _beta(beta), _gamma(gamma), _u(u), _v(v), component_breaks(false), _changes_stack(changes_stack)
 {
+    // TODO: remove after debug
+    std::cout << "alpha in process B constructor" << std::endl;
+    for (auto it = _alpha.begin(); it != _alpha.end(); ++it)
+    {
+        it->print();
+    }
+    std::cout << "beta in process B constructor" << std::endl;
+    for (auto it = _beta.begin(); it != _beta.end(); ++it)
+    {
+        it->print();
+    }
+    std::cout << "gamma in process B constructor" << std::endl;
+    for (auto it = _gamma.begin(); it != _gamma.end(); ++it)
+    {
+        it->print();
+    }
     _init();
 }
 
@@ -434,11 +450,16 @@ void my::StepDetectNotBreak::advance()
 
         // push change to stack to save alpha(w) before changing it
         // alpha(w) will be moved to the old EdgeSet change record field
+        std::cout << "alpha check for " << _current_w << std::endl;
+        _alpha[_current_w].print();
+        std::cout << "address: " << &_alpha[_current_w] << std::endl;
         _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::AlphaBetaMove, _current_w, _current_w, 0, std::move(_alpha[_current_w])});
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::RestoreBeta, _current_w, _current_w, 0, EdgeSet{}});
+        std::cout << "moved old set" << std::endl;
 
         // transfer beta(w) to alpha(w), beta(w) is now empty
+        // NOTE: what happens if execution stops after Step 5 and _beta[_current_w] is invalid because it was moved?
         _alpha[_current_w] = std::move(_beta[_current_w]);
-
 
         // initialize edge iterator for gamma(w)
         _current_esi = _gamma[_current_w].begin();
@@ -480,6 +501,7 @@ void my::StepDetectNotBreak::advance()
         // transfer gamma(w) to beta(w)
         // gamma(w) is emptied inside the move
         _beta[_current_w] = std::move(_gamma[_current_w]);
+        _gamma[_current_w].clear();
         // no need to keep track of old EdgeSet for the change record for this move
         _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::BetaGammaMove, _current_w, _current_w, 0, EdgeSet{}});
         // also add the emptying of gamma(w) to the changes

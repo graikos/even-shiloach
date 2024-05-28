@@ -41,24 +41,28 @@ bool EdgeSet::empty()
     return _internal_set.empty();
 }
 
+void EdgeSet::clear()
+{
+    return _internal_set.clear();
+}
+
 EdgeSet &EdgeSet::operator=(EdgeSet &&other)
 {
+    std::cout << "EdgeSet move assignment operator" << std::endl;
     // don't move to self
     if (this == &other)
     {
         return *this;
     }
-    _internal_set.clear();
     // transfer the internal map
     _internal_set = std::move(other._internal_set);
-    // clear the map of the other edge set, essentially leaving it empty again
-    other._internal_set.clear();
     return *this;
 }
 
 EdgeSet::EdgeSet(EdgeSet &&other)
 {
     *this = std::move(other);
+    std::cout << "EdgeSet move consturctor" << std::endl;
 }
 
 EdgeSetIterator EdgeSet::begin()
