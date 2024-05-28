@@ -116,10 +116,10 @@ namespace my
     struct ChangeRecord
     {
         ChangeRecordType type;
-        Vertex v;
-        Vertex u;
-        int primary_set;
-        EdgeSet old_set;
+        Vertex v;        // considered the primary vertex concerned when dealing with edge sets
+        Vertex u;        // ignored when not Insert or Remove
+        int primary_set; // 0: alpha, 1: beta, 2: gamma
+        EdgeSet old_set; // ignored when not AlphaBetaMove
     };
 
     enum class StepDetectNotBreakState
@@ -154,7 +154,7 @@ namespace my
         void advance();
 
     private:
-        std::stack<ChangeRecord> &_changes_stack; // TODO: change int
+        std::stack<ChangeRecord> &_changes_stack;
 
         std::queue<Vertex> _Q;
 

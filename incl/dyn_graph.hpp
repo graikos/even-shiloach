@@ -12,7 +12,8 @@ class DynGraph
 public:
     std::vector<int> _levels;
     std::vector<int> _components;
-    std::unordered_map<Vertex, Vertex> _artificial_edges; // TODO: move to private
+    // TODO: maybe change this to EdgeSet
+    EdgeSet _artificial_edges; // TODO: move to private
     std::vector<EdgeSet> alpha;                           // TODO: move to private
     std::vector<EdgeSet> beta;                            // TODO: move to private
     std::vector<EdgeSet> gamma;                           // TODO: move to private
@@ -20,11 +21,12 @@ public:
     DynGraph(Graph &G);
     void init();
     void print();
+    void dyn_remove_edge(Edge e);
+    bool query_is_connected(Vertex v, Vertex u);
 
 private:
     Graph &_G;
     Vertex _r;
-    // std::unordered_map<Vertex, Vertex> _artificial_edges;
     int _component_max_idx;
     std::stack<my::ChangeRecord> _change_history;
 

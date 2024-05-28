@@ -53,29 +53,17 @@ void DynGraph::_add_artificial_edge(Vertex v, Vertex u)
 {
     // artificial edges will be kept in a hash map, with key the min of the two and value the max of the two
     std::cout << "Adding" << std::endl;
-    _artificial_edges[(v < u) ? v : u] = (v >= u) ? v : u;
+    _artificial_edges.add_edge(u, v);
 }
 
 void DynGraph::_remove_artificial_edge(Vertex v, Vertex u)
 {
-    auto k = _artificial_edges.find((v < u) ? v : u);
-    if (k != _artificial_edges.end())
-    {
-        _artificial_edges.erase(k);
-    }
+    _artificial_edges.remove_edge(v, u);
 }
 
 bool DynGraph::_check_if_artificially_connected(Vertex v, Vertex u)
 {
-    try
-    {
-        _artificial_edges.at((v < u) ? v : u);
-        return true;
-    }
-    catch (const std::out_of_range &e)
-    {
-        return false;
-    }
+    return _artificial_edges.contains(v, u);
 }
 
 void DynGraph::print()
@@ -159,4 +147,63 @@ void DynGraph::_rewind()
             continue;
         }
     }
+}
+
+void DynGraph::dyn_remove_edge(Edge e)
+{
+
+    Vertex u = source(e, _G);
+    Vertex v = target(e, _G);
+
+    // remove the edge from the graph, the edge is removed from the appropriate EdgeSets inside process B
+    remove_edge(e, _G);
+
+    // initialize the "parallel" processes
+    my::StepDetectBreak procA(_G, u, v);
+    my::StepDetectNotBreak procB(_levels, alpha, beta, gamma, _change_history, u, v);
+
+    // Execution halts if:
+    // 1) Process B halts. Result: no component breaks
+    // 2) Process A halts and has detected component break. Result: component breaks
+    // In other cases, if A has finished but no component breaks, and B is still running, A is skipped
+    while (procB.state != my::StepDetectNotBreakState::Finished)
+    {
+        if (procA.state != my::StepDetectBreakState::Finished)
+        {
+            procA.advance();
+        }
+        if (procA.state == my::StepDetectBreakState::Finished && procA.component_breaks)
+        {
+            // here process A has detected a component breaking
+            // we need to update components, rewind process B changes, and add artifical edge
+            ++_component_max_idx;
+            for (auto it = procA.small_component.begin(); it != procA.small_component.end(); ++it)
+            {
+                _components[*it] = _component_max_idx;
+            }
+            _rewind();
+
+            // now add artificial edge
+            _artificial_edges.add_edge(u, v);
+
+            // follow convention that u is the one with the smaller level
+            if (_levels[v] < _levels[u])
+            {
+                std::swap(v, u);
+            }
+
+            // add artificial edge to edge sets again
+            // TODO: think about this
+            gamma[u].add_edge(u, v);
+            alpha[v].add_edge(u, v);
+
+            break;
+        }
+        procB.advance();
+    }
+}
+
+bool DynGraph::query_is_connected(Vertex v, Vertex u)
+{
+    return _components[v] == _components[u];
 }

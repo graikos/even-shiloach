@@ -30,6 +30,7 @@ public:
 
     void add_edge(Vertex u, Vertex v);
     bool remove_edge(Vertex u, Vertex v);
+    bool contains(Vertex u, Vertex v);
     bool empty();
     Vertex other_end(EdgeSetIterator it, Vertex v);
     EdgeSetIterator begin();
