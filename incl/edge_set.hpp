@@ -26,6 +26,7 @@ public:
     EdgeSet() = default;
 
     EdgeSet &operator=(EdgeSet &&other);
+    EdgeSet(EdgeSet &&other);
 
     void add_edge(Vertex u, Vertex v);
     bool remove_edge(Vertex u, Vertex v);

@@ -295,7 +295,7 @@ void my::StepDetectBreak::advance()
 }
 
 my::StepDetectNotBreak::StepDetectNotBreak(std::vector<int> &levels, std::vector<EdgeSet> &alpha, std::vector<EdgeSet> &beta,
-                                           std::vector<EdgeSet> &gamma, std::stack<int> &changes_stack,
+                                           std::vector<EdgeSet> &gamma, std::stack<ChangeRecord> &changes_stack,
                                            Vertex u, Vertex v) : _levels(levels), _alpha(alpha), _beta(beta), _gamma(gamma), _u(u), _v(v), component_breaks(false), _changes_stack(changes_stack)
 {
     _init();
@@ -393,6 +393,8 @@ void my::StepDetectNotBreak::advance()
 
         // increase popped vertex level
         ++_levels[_current_w];
+        // add change to stack
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::LevelBump, _current_w, _current_w, 0, EdgeSet{}});
 
         _current_esi = _beta[_current_w].begin();
 
@@ -416,6 +418,9 @@ void my::StepDetectNotBreak::advance()
         _beta[w_prime].remove_edge(_current_w, w_prime);
         _gamma[w_prime].add_edge(_current_w, w_prime);
 
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::Remove, w_prime, _current_w, 1, EdgeSet{}});
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::Insert, w_prime, _current_w, 2, EdgeSet{}});
+
         std::cout << "Step 4: Examined edge: (" << _current_w << "," << w_prime << ")" << std::endl;
 
         // continue with next edge in beta(w)
@@ -426,8 +431,14 @@ void my::StepDetectNotBreak::advance()
     case StepDetectNotBreakState::AvalancheStep5:
 
         std::cout << "Step 5" << std::endl;
+
+        // push change to stack to save alpha(w) before changing it
+        // alpha(w) will be moved to the old EdgeSet change record field
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::AlphaBetaMove, _current_w, _current_w, 0, std::move(_alpha[_current_w])});
+
         // transfer beta(w) to alpha(w), beta(w) is now empty
         _alpha[_current_w] = std::move(_beta[_current_w]);
+
 
         // initialize edge iterator for gamma(w)
         _current_esi = _gamma[_current_w].begin();
@@ -448,6 +459,10 @@ void my::StepDetectNotBreak::advance()
         Vertex w_prime = _gamma[_current_w].other_end(_current_esi, _current_w);
         _alpha[w_prime].remove_edge(w_prime, _current_w);
         _beta[w_prime].add_edge(w_prime, _current_w);
+
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::Remove, w_prime, _current_w, 0, EdgeSet{}});
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::Insert, w_prime, _current_w, 1, EdgeSet{}});
+
         std::cout << "Step 6: examined edge: (" << _current_w << "," << w_prime << ")" << std::endl;
 
         if (_alpha[w_prime].empty())
@@ -465,6 +480,10 @@ void my::StepDetectNotBreak::advance()
         // transfer gamma(w) to beta(w)
         // gamma(w) is emptied inside the move
         _beta[_current_w] = std::move(_gamma[_current_w]);
+        // no need to keep track of old EdgeSet for the change record for this move
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::BetaGammaMove, _current_w, _current_w, 0, EdgeSet{}});
+        // also add the emptying of gamma(w) to the changes
+        _changes_stack.push(my::ChangeRecord{my::ChangeRecordType::GammaEmptyMove, _current_w, _current_w, 0, EdgeSet{}});
         std::cout << "Step 7" << std::endl;
 
         state = StepDetectNotBreakState::AvalancheStep8;

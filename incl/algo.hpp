@@ -103,6 +103,25 @@ namespace my
         StepScanDFS sdfs2;
     };
 
+    enum class ChangeRecordType
+    {
+        LevelBump,
+        Insert,
+        Remove,
+        AlphaBetaMove,
+        BetaGammaMove,
+        GammaEmptyMove,
+    };
+
+    struct ChangeRecord
+    {
+        ChangeRecordType type;
+        Vertex v;
+        Vertex u;
+        int primary_set;
+        EdgeSet old_set;
+    };
+
     enum class StepDetectNotBreakState
     {
         Uninitialized,
@@ -129,13 +148,13 @@ namespace my
                            std::vector<EdgeSet> &alpha,
                            std::vector<EdgeSet> &beta,
                            std::vector<EdgeSet> &gamma,
-                           std::stack<int> &changes_stack,
+                           std::stack<ChangeRecord> &changes_stack,
                            Vertex u, Vertex v);
 
         void advance();
 
     private:
-        std::stack<int> &_changes_stack; // TODO: change int
+        std::stack<ChangeRecord> &_changes_stack; // TODO: change int
 
         std::queue<Vertex> _Q;
 

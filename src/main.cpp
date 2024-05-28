@@ -82,7 +82,7 @@ int main()
     std::cout << std::endl;
     printVector(DG._components);
 
-    std::stack<int> stacky;
+    std::stack<my::ChangeRecord> stacky;
 
     std::cout << "Artificial Edges: " << std::endl;
     for (auto k = DG._artificial_edges.begin(); k != DG._artificial_edges.end(); ++k)

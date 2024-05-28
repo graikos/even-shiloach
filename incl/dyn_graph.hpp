@@ -3,6 +3,9 @@
 
 #include "graph.hpp"
 #include "edge_set.hpp"
+#include <stack>
+#include "algo.hpp"
+
 
 class DynGraph
 {
@@ -23,9 +26,11 @@ private:
     Vertex _r;
     // std::unordered_map<Vertex, Vertex> _artificial_edges;
     int _component_max_idx;
+    std::stack<my::ChangeRecord> _change_history;
 
     void _add_artificial_edge(Vertex v, Vertex u);
     void _remove_artificial_edge(Vertex v, Vertex u);
+    void _rewind();
     bool _check_if_artificially_connected(Vertex v, Vertex u);
 };
 
