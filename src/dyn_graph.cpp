@@ -26,9 +26,7 @@ void DynGraph::init()
 
     // pick random vertex as root
     mt19937 mt(std::time(0));
-    // TODO: change back after debug
-    // _r = vertex(mt() % num_vertices(_G), _G);
-    _r = vertex(2, _G);
+    _r = vertex(mt() % num_vertices(_G), _G);
 
     std::cout << "Picked as root: " << _r << std::endl;
 
