@@ -81,15 +81,6 @@ int main()
     // DG.dyn_remove_edge(edge_handles[2]);
     // printVector(DG._components);
 
-    std::cout << "Destroying alphas: " << std::endl;
-    int i = 0;
-    for (auto it = DG.alpha.begin(); it != DG.alpha.end(); ++it)
-    {
-        std::cout << "Vertex: " << i << std::endl;
-        std::cout << std::flush;
-        it->~EdgeSet();
-        ++i;
-    }
     std::cout << "exit" << std::endl;
 
 
