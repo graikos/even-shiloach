@@ -26,9 +26,9 @@ void DynGraph::init()
 
     // pick random vertex as root
     mt19937 mt(std::time(0));
-    // TODO: Change back after debug
+    // TODO: change back after debug
     // _r = vertex(mt() % num_vertices(_G), _G);
-    _r = vertex(1, _G);
+    _r = vertex(2, _G);
 
     std::cout << "Picked as root: " << _r << std::endl;
 
@@ -98,26 +98,26 @@ void DynGraph::_rewind()
 
         switch (record.type)
         {
-        case my::ChangeRecordType::LevelBump:
-            std::cout << "Rewinding level bump" << std::endl;
+        case ChangeRecordType::LevelBump:
+            std::cout << "Rewinding level bump, v: " << record.v << std::endl;
 
             // undo the level increase of v
             --_levels[record.v];
             break;
 
-        case my::ChangeRecordType::Insert:
-            std::cout << "rewinding insert" << std::endl;
+        case ChangeRecordType::Insert:
+            std::cout << "rewinding insert, v: " << record.v << std::endl;
             (*(s[record.primary_set]))[record.v].remove_edge(record.v, record.u);
             break;
 
-        case my::ChangeRecordType::Remove:
-            std::cout << "rewinding remove" << std::endl;
+        case ChangeRecordType::Remove:
+            std::cout << "rewinding remove, v: " << record.v << std::endl;
             (*(s[record.primary_set]))[record.v].add_edge(record.v, record.u);
             break;
 
-        case my::ChangeRecordType::RestoreBeta:
+        case ChangeRecordType::RestoreBeta:
 
-            std::cout << "rewinding restore beta" << std::endl;
+            std::cout << "rewinding restore beta, v: " << record.v << std::endl;
 
             // this is restoring beta(w), which is invalidate with the move inside step 5
             // in step 5 beta(w) is moved to alpha(w). During rewinding, if we only rewind
@@ -128,46 +128,51 @@ void DynGraph::_rewind()
 
             break;
 
-        case my::ChangeRecordType::AlphaBetaMove:
+        case ChangeRecordType::AlphaBetaMove:
 
-            std::cout << "rewinding alpha beta move" << std::endl;
+            std::cout << "rewinding alpha beta move, v: " <<  record.v << std::endl;
 
             // undo the alpha(w) <- beta(w)
             // the old alpha is kept
+            // TODO: REMOVE THIS
+            if (record.v == 5)
+            {
+                (&(record.old_set))->~EdgeSet();
+            }
             alpha[record.v] = std::move(record.old_set);
 
             break;
 
-        // case my::ChangeRecordType::BetaGammaMove:
-        //     std::cout << "rewinding beta gamma move" << std::endl;
+        case ChangeRecordType::BetaGammaMove:
+            std::cout << "rewinding beta gamma move, v: " << record.v << std::endl;
 
-        //     // undo the beta(w) <- gamma(w)
-        //     // to do that, use the current alpha(w)
-        //     // This will work because we use a stack, meaning we traverse the avalanche steps in reverse
-        //     // This means that we have not yet changed alpha(w) back to the old one, meaning at this step
-        //     // alpha(w) holds the old beta(w) still.
-        //     // Also, there is the issue of moving alpha(w) to beta(w), thus invalidating the current alpha(w),
-        //     // running the risk of leaving the alpha(w) set as undefined in the new version of the dyn_graph.
-        //     // This CANNOT happen because there is nothing between step 7 to step 5 that could break the execution of
-        //     // process B, thus leaving alpha(w) unchanged, which will happen at step 5.
-        //     // Also, in step 6 no changes are made to alpha(w).
-        //     // Essentially, if we find ourselves in this step, rewinding the beta(w) <- gamma(w) move, we will certainly
-        //     // rewind the alpha(w) <- beta(w) move too, thus setting the momentarily undefined alpha(w) back to its
-        //     // old version.
+            // undo the beta(w) <- gamma(w)
+            // to do that, use the current alpha(w)
+            // This will work because we use a stack, meaning we traverse the avalanche steps in reverse
+            // This means that we have not yet changed alpha(w) back to the old one, meaning at this step
+            // alpha(w) holds the old beta(w) still.
+            // Also, there is the issue of moving alpha(w) to beta(w), thus invalidating the current alpha(w),
+            // running the risk of leaving the alpha(w) set as undefined in the new version of the dyn_graph.
+            // This CANNOT happen because there is nothing between step 7 to step 5 that could break the execution of
+            // process B, thus leaving alpha(w) unchanged, which will happen at step 5.
+            // Also, in step 6 no changes are made to alpha(w).
+            // Essentially, if we find ourselves in this step, rewinding the beta(w) <- gamma(w) move, we will certainly
+            // rewind the alpha(w) <- beta(w) move too, thus setting the momentarily undefined alpha(w) back to its
+            // old version.
 
-        //     beta[record.v] = std::move(alpha[record.v]);
+            beta[record.v] = std::move(alpha[record.v]);
 
-        //     break;
+            break;
 
-        // case my::ChangeRecordType::GammaEmptyMove:
+        case ChangeRecordType::GammaEmptyMove:
 
-        //     std::cout << "rewinding gamma empty move" << std::endl;
+            std::cout << "rewinding gamma empty move, v: " << record.v << std::endl;
 
-        //     // similary, this takes place before the previous rewind, so
-        //     // beta(w) will still have the old value of gamma(w)
+            // similary, this takes place before the previous rewind, so
+            // beta(w) will still have the old value of gamma(w)
 
-        //     gamma[record.v] = std::move(beta[record.v]);
-        //     break;
+            gamma[record.v] = std::move(beta[record.v]);
+            break;
 
         default:
             continue;
@@ -182,6 +187,7 @@ void DynGraph::dyn_remove_edge(Edge e)
     Vertex u = source(e, _G);
     Vertex v = target(e, _G);
 
+    std::cout << "Removing edge: " << e << std::endl;
     // remove the edge from the graph, the edge is removed from the appropriate EdgeSets inside process B
     remove_edge(e, _G);
 
@@ -232,7 +238,9 @@ void DynGraph::dyn_remove_edge(Edge e)
     }
     // after each run, empty change history
     // NOTE: this takes O(N) to delete all elements
-    _change_history ={};
+    std::cout << "Emtpying stack: " << std::endl;
+    _change_history = std::stack<ChangeRecord>();
+    std::cout << "Done emtpying stack: " << std::endl;
 }
 
 bool DynGraph::query_is_connected(Vertex v, Vertex u)

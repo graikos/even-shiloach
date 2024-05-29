@@ -1,8 +1,9 @@
 #include "gen.hpp"
+#include <boost/graph/random.hpp>
 
 using namespace boost;
 
-void generate_ring(Graph &G, int n, std::vector<Edge> &edge_handles)
+void gen::generate_ring(Graph &G, int n, std::vector<Edge> &edge_handles)
 {
     add_vertex(G);
     Edge e;
@@ -13,4 +14,15 @@ void generate_ring(Graph &G, int n, std::vector<Edge> &edge_handles)
         edge_handles.push_back(e);
     }
     tie(e, c) = add_edge(0, n - 1, G);
+    edge_handles.push_back(e);
+}
+
+void gen::generate_random(Graph &G, int n, int m, std::vector<Edge> &edge_handles, mt19937 &mt)
+{
+    boost::generate_random_graph(G, n, m, mt, false, false);
+    EdgeIterator ei, eiend;
+    for (tie(ei, eiend) = edges(G); ei != eiend; ++ei)
+    {
+        edge_handles.push_back(*ei);
+    }
 }

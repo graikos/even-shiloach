@@ -53,7 +53,7 @@ int main()
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    generate_ring(G, 4, edge_handles);
+    gen::generate_ring(G, 8, edge_handles);
 
 
     DynGraph DG(G);
@@ -63,6 +63,8 @@ int main()
     std::cout << std::endl;
     printVector(DG._components);
     std::cout << std::endl;
+    std::cout << "Edges" << std::endl;
+    printVector(edge_handles);
 
     DG.dyn_remove_edge(edge_handles[0]);
     printVector(DG._levels);
@@ -71,10 +73,25 @@ int main()
     std::cout << std::endl;
     DG.dyn_remove_edge(edge_handles[1]);
     printVector(DG._components);
-    // DG.dyn_remove_edge(e3);
+    std::cout << "Levels: " << std::endl;
+    printVector(DG._levels);
+    std::cout << std::endl;
+    DG.dyn_remove_edge(edge_handles[3]);
+    printVector(DG._components);
+    // DG.dyn_remove_edge(edge_handles[2]);
     // printVector(DG._components);
-    // DG.dyn_remove_edge(e4);
-    // printVector(DG._components);
+
+    std::cout << "Destroying alphas: " << std::endl;
+    int i = 0;
+    for (auto it = DG.alpha.begin(); it != DG.alpha.end(); ++it)
+    {
+        std::cout << "Vertex: " << i << std::endl;
+        std::cout << std::flush;
+        it->~EdgeSet();
+        ++i;
+    }
+    std::cout << "exit" << std::endl;
+
 
     return 0;
 }

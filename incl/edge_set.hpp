@@ -38,6 +38,7 @@ public:
     EdgeSetIterator end();
     void print();
 
+
 private:
     std::unordered_set<std::pair<Vertex, Vertex>, vertex_pair_hash> _internal_set;
 };

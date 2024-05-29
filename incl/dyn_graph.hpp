@@ -5,6 +5,7 @@
 #include "edge_set.hpp"
 #include <stack>
 #include "algo.hpp"
+#include "change_record.hpp"
 
 class DynGraph
 {
@@ -26,7 +27,7 @@ private:
     Graph &_G;
     Vertex _r;
     int _component_max_idx;
-    std::stack<my::ChangeRecord> _change_history;
+    std::stack<ChangeRecord> _change_history;
 
     void _add_artificial_edge(Vertex v, Vertex u);
     void _remove_artificial_edge(Vertex v, Vertex u);

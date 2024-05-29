@@ -1,7 +1,7 @@
 INCL = '../incl'
 CC = g++
 
-DEBUG ?= 0
+DEBUG ?= 1
 SANITIZE ?= 0
 
 CFLAGS = -std=c++0x
@@ -17,8 +17,8 @@ ifeq ($(SANITIZE), 1)
 endif
 
 
-dyn_connected: main.o graph.o dyn_graph.o algo.o edge_set.o gen.o
-	$(CC) $(CFLAGS) -o dyn_connected main.o graph.o dyn_graph.o algo.o edge_set.o gen.o -I $(INCL)
+dyn_connected: main.o graph.o dyn_graph.o algo.o edge_set.o gen.o change_record.o
+	$(CC) $(CFLAGS) -o dyn_connected main.o graph.o dyn_graph.o algo.o edge_set.o gen.o change_record.o -I $(INCL)
 
 main.o: ../src/main.cpp
 	$(CC) $(CFLAGS) -c $^ -I $(INCL)
@@ -37,6 +37,10 @@ edge_set.o: ../src/edge_set.cpp
 
 gen.o: ../src/gen.cpp
 	$(CC) $(CFLAGS) -c $^ -I $(INCL)
+
+change_record.o: ../src/change_record.cpp
+	$(CC) $(CFLAGS) -c $^ -I $(INCL)
+
 
 run:
 	./dyn_connected

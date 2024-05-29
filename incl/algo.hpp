@@ -3,6 +3,7 @@
 
 #include "graph.hpp"
 #include "edge_set.hpp"
+#include "change_record.hpp"
 #include <stack>
 #include <queue>
 #include <list>
@@ -103,25 +104,6 @@ namespace my
         StepScanDFS sdfs2;
     };
 
-    enum class ChangeRecordType
-    {
-        LevelBump,
-        Insert,
-        Remove,
-        AlphaBetaMove,
-        RestoreBeta,
-        BetaGammaMove,
-        GammaEmptyMove,
-    };
-
-    struct ChangeRecord
-    {
-        ChangeRecordType type;
-        Vertex v;        // considered the primary vertex concerned when dealing with edge sets
-        Vertex u;        // ignored when not Insert or Remove
-        int primary_set; // 0: alpha, 1: beta, 2: gamma
-        EdgeSet old_set; // ignored when not AlphaBetaMove
-    };
 
     enum class StepDetectNotBreakState
     {
