@@ -330,7 +330,6 @@ void my::StepDetectNotBreak::advance()
     case StepDetectNotBreakState::InitialCheckLevels:
         if (_levels[_u] == _levels[_v])
         {
-            std::cout << "Endpoints were at the same level." << std::endl;
             // same level means component does not break
             // remove edge from beta sets of each
             _beta[_u].remove_edge(_u, _v);
@@ -340,7 +339,6 @@ void my::StepDetectNotBreak::advance()
             component_breaks = false;
             return;
         }
-        std::cout << "Moving to initial different levels." << std::endl;
         state = StepDetectNotBreakState::InitialDifferentLevels;
         return;
 
@@ -358,7 +356,6 @@ void my::StepDetectNotBreak::advance()
 
         if (!_alpha[_v].empty())
         {
-            std::cout << "alpha(v) not empty; component did not break" << std::endl;
             // components have not changed
             state = StepDetectNotBreakState::Finished;
             component_breaks = false;
@@ -370,7 +367,6 @@ void my::StepDetectNotBreak::advance()
 
     case StepDetectNotBreakState::InitLevelAvalanche:
 
-        std::cout << "Init avalanche" << std::endl;
         _Q.push(_v);
         state = StepDetectNotBreakState::AvalancheStep1_2_3;
         return;
@@ -380,7 +376,6 @@ void my::StepDetectNotBreak::advance()
         // check if process should stop because of empty queue
         if (_Q.empty())
         {
-            std::cout << "queue is empty; finished" << std::endl;
             component_breaks = false;
             state = StepDetectNotBreakState::Finished;
             return;
@@ -389,7 +384,6 @@ void my::StepDetectNotBreak::advance()
         // pop queue
         _current_w = _Q.front();
         _Q.pop();
-        std::cout << "Popped: " << _current_w << std::endl;
 
         // increase popped vertex level
         ++_levels[_current_w];
@@ -406,7 +400,6 @@ void my::StepDetectNotBreak::advance()
     {
         if (_current_esi == _beta[_current_w].end())
         {
-            std::cout << "Step 4: all edges examined" << std::endl;
             // iterated through all of beta(w) edges, move to next step
             state = StepDetectNotBreakState::AvalancheStep5;
             return;
@@ -421,8 +414,6 @@ void my::StepDetectNotBreak::advance()
         _changes_stack.push(ChangeRecord(ChangeRecordType::Remove, w_prime, _current_w, 1));
         _changes_stack.push(ChangeRecord(ChangeRecordType::Insert, w_prime, _current_w, 2));
 
-        std::cout << "Step 4: Examined edge: (" << _current_w << "," << w_prime << ")" << std::endl;
-
         // continue with next edge in beta(w)
         ++_current_esi;
         return;
@@ -431,21 +422,20 @@ void my::StepDetectNotBreak::advance()
     case StepDetectNotBreakState::AvalancheStep5:
     {
 
-        std::cout << "Step 5" << std::endl;
-
         // push change to stack to save alpha(w) before changing it
         // alpha(w) will be moved to the old EdgeSet change record field
-        std::cout << "alpha check for " << _current_w << std::endl;
-        _alpha[_current_w].print();
-        std::cout << "address: " << &_alpha[_current_w] << std::endl;
+
+        // NOTE: careful handling here to avoid any implicit destructors that would the internal sets
+        // in an invalid state
         ChangeRecord abmove(ChangeRecordType::AlphaBetaMove, _current_w, _current_w, 0);
         abmove.old_set = std::move(_alpha[_current_w]);
         _changes_stack.push(std::move(abmove));
+
+        // the move operation on beta also needs to be recorded, in case execution stops after step 5.
+        // If so, without rewinding the beta(w) value, it will be left in an undefined state after the move
         _changes_stack.push(ChangeRecord(ChangeRecordType::RestoreBeta, _current_w, _current_w, 0));
-        std::cout << "moved old set" << std::endl;
 
         // transfer beta(w) to alpha(w), beta(w) is now empty
-        // NOTE: what happens if execution stops after Step 5 and _beta[_current_w] is invalid because it was moved?
         _alpha[_current_w] = std::move(_beta[_current_w]);
 
         // initialize edge iterator for gamma(w)
@@ -459,7 +449,6 @@ void my::StepDetectNotBreak::advance()
     {
         if (_current_esi == _gamma[_current_w].end())
         {
-            std::cout << "Step 6: examined all edges" << std::endl;
             // iterated through all of gamma(w) edges
             state = StepDetectNotBreakState::AvalancheStep7;
             return;
@@ -472,11 +461,8 @@ void my::StepDetectNotBreak::advance()
         _changes_stack.push(ChangeRecord(ChangeRecordType::Remove, w_prime, _current_w, 0));
         _changes_stack.push(ChangeRecord(ChangeRecordType::Insert, w_prime, _current_w, 1));
 
-        std::cout << "Step 6: examined edge: (" << _current_w << "," << w_prime << ")" << std::endl;
-
         if (_alpha[w_prime].empty())
         {
-            std::cout << "alpha(w') found emtpy; pushing w_prime to queue" << std::endl;
             _Q.push(w_prime);
         }
 
@@ -494,7 +480,6 @@ void my::StepDetectNotBreak::advance()
         _changes_stack.push(ChangeRecord(ChangeRecordType::BetaGammaMove, _current_w, _current_w, 0));
         // also add the emptying of gamma(w) to the changes
         _changes_stack.push(ChangeRecord(ChangeRecordType::GammaEmptyMove, _current_w, _current_w, 0));
-        std::cout << "Step 7" << std::endl;
 
         state = StepDetectNotBreakState::AvalancheStep8;
 
@@ -502,10 +487,8 @@ void my::StepDetectNotBreak::advance()
 
     case StepDetectNotBreakState::AvalancheStep8:
 
-        std::cout << "Step 8" << std::endl;
         if (_alpha[_current_w].empty())
         {
-            std::cout << "Step 8: alpha(w) is still empty, pushing again" << std::endl;
             // alpha(w) is still empty, push to queue again
             _Q.push(_current_w);
         }

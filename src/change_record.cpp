@@ -25,9 +25,3 @@ ChangeRecord &ChangeRecord::operator=(ChangeRecord &&other)
     }
     return *this;
 }
-
-ChangeRecord::~ChangeRecord()
-{
-    std::cout << "ChangeRecord destuctor of vertex: " << v << std::endl;
-    std::cout << "ChangeRecord destuctor of type: " << ((type == ChangeRecordType::AlphaBetaMove) ? "ALPHABETA" : "other") << std::endl;
-}

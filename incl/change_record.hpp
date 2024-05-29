@@ -27,8 +27,6 @@ public:
 
     ChangeRecord(ChangeRecord &&other);
     ChangeRecord &operator=(ChangeRecord &&other);
-
-    ~ChangeRecord();
 };
 
 #endif

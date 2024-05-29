@@ -48,12 +48,10 @@ void EdgeSet::clear()
 
 EdgeSet::EdgeSet(EdgeSet &&other) : _internal_set(std::move(other._internal_set))
 {
-    std::cout << "EdgeSet move consturctor" << std::endl;
 }
 
 EdgeSet &EdgeSet::operator=(EdgeSet &&other)
 {
-    std::cout << "EdgeSet move assignment operator" << std::endl;
     // don't move to self
     if (this != &other)
     {

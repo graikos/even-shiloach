@@ -28,7 +28,6 @@ void DynGraph::init()
     mt19937 mt(std::time(0));
     _r = vertex(mt() % num_vertices(_G), _G);
 
-    std::cout << "Picked as root: " << _r << std::endl;
 
     // perform initial BFS from root r
     my::bfs(_G, _r, _levels, _components, _component_max_idx, alpha, beta, gamma);
@@ -53,7 +52,6 @@ void DynGraph::init()
 void DynGraph::_add_artificial_edge(Vertex v, Vertex u)
 {
     // artificial edges will be kept in a hash map, with key the min of the two and value the max of the two
-    std::cout << "Adding" << std::endl;
     _artificial_edges.add_edge(u, v);
 }
 
@@ -84,9 +82,6 @@ void DynGraph::print()
 
 void DynGraph::_rewind()
 {
-
-    std::cout << "rewinding" << std::endl;
-
     std::vector<std::vector<EdgeSet> *> s = {&alpha, &beta, &gamma};
 
     while (!_change_history.empty())
@@ -98,25 +93,21 @@ void DynGraph::_rewind()
         switch (record.type)
         {
         case ChangeRecordType::LevelBump:
-            std::cout << "Rewinding level bump, v: " << record.v << std::endl;
 
             // undo the level increase of v
             --_levels[record.v];
             break;
 
         case ChangeRecordType::Insert:
-            std::cout << "rewinding insert, v: " << record.v << std::endl;
             (*(s[record.primary_set]))[record.v].remove_edge(record.v, record.u);
             break;
 
         case ChangeRecordType::Remove:
-            std::cout << "rewinding remove, v: " << record.v << std::endl;
             (*(s[record.primary_set]))[record.v].add_edge(record.v, record.u);
             break;
 
         case ChangeRecordType::RestoreBeta:
 
-            std::cout << "rewinding restore beta, v: " << record.v << std::endl;
 
             // this is restoring beta(w), which is invalidate with the move inside step 5
             // in step 5 beta(w) is moved to alpha(w). During rewinding, if we only rewind
@@ -129,7 +120,6 @@ void DynGraph::_rewind()
 
         case ChangeRecordType::AlphaBetaMove:
 
-            std::cout << "rewinding alpha beta move, v: " <<  record.v << std::endl;
 
             // undo the alpha(w) <- beta(w)
             alpha[record.v] = std::move(record.old_set);
@@ -137,7 +127,6 @@ void DynGraph::_rewind()
             break;
 
         case ChangeRecordType::BetaGammaMove:
-            std::cout << "rewinding beta gamma move, v: " << record.v << std::endl;
 
             // undo the beta(w) <- gamma(w)
             // to do that, use the current alpha(w)
@@ -159,7 +148,6 @@ void DynGraph::_rewind()
 
         case ChangeRecordType::GammaEmptyMove:
 
-            std::cout << "rewinding gamma empty move, v: " << record.v << std::endl;
 
             // similary, this takes place before the previous rewind, so
             // beta(w) will still have the old value of gamma(w)
@@ -171,7 +159,6 @@ void DynGraph::_rewind()
             continue;
         }
     }
-    std::cout << "Done" << std::endl;
 }
 
 void DynGraph::dyn_remove_edge(Edge e)
@@ -180,7 +167,6 @@ void DynGraph::dyn_remove_edge(Edge e)
     Vertex u = source(e, _G);
     Vertex v = target(e, _G);
 
-    std::cout << "Removing edge: " << e << std::endl;
     // remove the edge from the graph, the edge is removed from the appropriate EdgeSets inside process B
     remove_edge(e, _G);
 
@@ -223,7 +209,6 @@ void DynGraph::dyn_remove_edge(Edge e)
             gamma[u].add_edge(u, v);
             alpha[v].add_edge(u, v);
 
-            std::cout << "Process A detected break" << std::endl;
 
             break;
         }
@@ -231,9 +216,7 @@ void DynGraph::dyn_remove_edge(Edge e)
     }
     // after each run, empty change history
     // NOTE: this takes O(N) to delete all elements
-    std::cout << "Emtpying stack: " << std::endl;
     _change_history = std::stack<ChangeRecord>();
-    std::cout << "Done emtpying stack: " << std::endl;
 }
 
 bool DynGraph::query_is_connected(Vertex v, Vertex u)

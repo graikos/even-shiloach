@@ -53,36 +53,15 @@ int main()
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    gen::generate_ring(G, 8, edge_handles);
+    gen::generate_line(G, 10, edge_handles);
 
 
     DynGraph DG(G);
-    DG.print();
-
+    DG.dyn_remove_edge(edge_handles[4]);
+    std::cout << "Levels:" << std::endl;
     printVector(DG._levels);
-    std::cout << std::endl;
+    std::cout << "Components:" << std::endl;
     printVector(DG._components);
-    std::cout << std::endl;
-    std::cout << "Edges" << std::endl;
-    printVector(edge_handles);
-
-    DG.dyn_remove_edge(edge_handles[0]);
-    printVector(DG._levels);
-    std::cout << std::endl;
-    printVector(DG._components);
-    std::cout << std::endl;
-    DG.dyn_remove_edge(edge_handles[1]);
-    printVector(DG._components);
-    std::cout << "Levels: " << std::endl;
-    printVector(DG._levels);
-    std::cout << std::endl;
-    DG.dyn_remove_edge(edge_handles[3]);
-    printVector(DG._components);
-    // DG.dyn_remove_edge(edge_handles[2]);
-    // printVector(DG._components);
-
-    std::cout << "exit" << std::endl;
-
 
     return 0;
 }

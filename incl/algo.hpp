@@ -57,9 +57,9 @@ namespace my
     private:
         const Graph &_G;
         std::stack<Vertex> _stack;
-        // using a set instead of a vector here to avoid the O(N) initialization, which changes the complexity of subsequent algorithms.
+        // using a set instead of a visited vector here to avoid the O(N) initialization, which changes the complexity of subsequent algorithms.
         // The complexity analysis of algorithms such as circuit_free_update_components assumes that a DFS scan running for a small component
-        // will only pay for the vertices it has, and not the N vertices of the graph.
+        // will only pay for the vertices it has in its subtree, and not the N vertices of the graph.
         std::unordered_set<Vertex> _visited;
         Vertex _s;
         Vertex _t;
@@ -90,6 +90,7 @@ namespace my
     class StepDetectBreak
     {
     public:
+        // component_breaks holds the result the execution, only matters if it's true
         bool component_breaks;
         StepDetectBreakState state;
         std::list<Vertex> small_component;
@@ -100,6 +101,7 @@ namespace my
 
     private:
         const Graph &_G;
+        // one stepDFS for each of the two subtrees, running in "parallel"
         StepScanDFS sdfs1;
         StepScanDFS sdfs2;
     };
@@ -137,6 +139,8 @@ namespace my
         void advance();
 
     private:
+        // _changes_stack holds a history of the changes made, used to rewind the changes in case process A
+        // detects a break
         std::stack<ChangeRecord> &_changes_stack;
 
         std::queue<Vertex> _Q;
@@ -145,6 +149,7 @@ namespace my
         Vertex _v;
 
         std::vector<int> &_levels;
+        // an alpha/beta/gamma set for each vertex
         std::vector<EdgeSet> &_alpha;
         std::vector<EdgeSet> &_beta;
         std::vector<EdgeSet> &_gamma;
