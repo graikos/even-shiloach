@@ -93,7 +93,8 @@ void DynGraph::_rewind()
 
     while (!_change_history.empty())
     {
-        auto &record = _change_history.top();
+        // WARNING: move here is necessary to avoid popping and destroying the reference while we use it below
+        ChangeRecord record = std::move(_change_history.top());
         _change_history.pop();
 
         switch (record.type)
@@ -133,12 +134,6 @@ void DynGraph::_rewind()
             std::cout << "rewinding alpha beta move, v: " <<  record.v << std::endl;
 
             // undo the alpha(w) <- beta(w)
-            // the old alpha is kept
-            // TODO: REMOVE THIS
-            if (record.v == 5)
-            {
-                (&(record.old_set))->~EdgeSet();
-            }
             alpha[record.v] = std::move(record.old_set);
 
             break;
