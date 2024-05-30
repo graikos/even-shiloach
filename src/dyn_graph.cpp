@@ -28,7 +28,6 @@ void DynGraph::init()
     mt19937 mt(std::time(0));
     _r = vertex(mt() % num_vertices(_G), _G);
 
-
     // perform initial BFS from root r
     my::bfs(_G, _r, _levels, _components, _component_max_idx, alpha, beta, gamma);
 
@@ -108,7 +107,6 @@ void DynGraph::_rewind()
 
         case ChangeRecordType::RestoreBeta:
 
-
             // this is restoring beta(w), which is invalidate with the move inside step 5
             // in step 5 beta(w) is moved to alpha(w). During rewinding, if we only rewind
             // alpha to its old set, beta(w) will be left invalid, with a possibility of not being
@@ -119,7 +117,6 @@ void DynGraph::_rewind()
             break;
 
         case ChangeRecordType::AlphaBetaMove:
-
 
             // undo the alpha(w) <- beta(w)
             alpha[record.v] = std::move(record.old_set);
@@ -148,7 +145,6 @@ void DynGraph::_rewind()
 
         case ChangeRecordType::GammaEmptyMove:
 
-
             // similary, this takes place before the previous rewind, so
             // beta(w) will still have the old value of gamma(w)
 
@@ -174,6 +170,8 @@ void DynGraph::dyn_remove_edge(Edge e)
     my::StepDetectBreak procA(_G, u, v);
     my::StepDetectNotBreak procB(_levels, alpha, beta, gamma, _change_history, u, v);
 
+    bool record_changes = true;
+
     // Execution halts if:
     // 1) Process B halts. Result: no component breaks
     // 2) Process A halts and has detected component break. Result: component breaks
@@ -184,38 +182,48 @@ void DynGraph::dyn_remove_edge(Edge e)
         {
             procA.advance();
         }
-        if (procA.state == my::StepDetectBreakState::Finished && procA.component_breaks)
+        else
         {
-            // here process A has detected a component breaking
-            // we need to update components, rewind process B changes, and add artifical edge
-            ++_component_max_idx;
-            for (auto it = procA.small_component.begin(); it != procA.small_component.end(); ++it)
+            if (procA.component_breaks)
             {
-                _components[*it] = _component_max_idx;
+                // here process A has detected a component breaking
+                // we need to update components, rewind process B changes, and add artifical edge
+                ++_component_max_idx;
+                for (auto it = procA.small_component.begin(); it != procA.small_component.end(); ++it)
+                {
+                    _components[*it] = _component_max_idx;
+                }
+                _rewind();
+
+                // now add artificial edge
+                _artificial_edges.add_edge(u, v);
+
+                // follow convention that u is the one with the smaller level
+                if (_levels[v] < _levels[u])
+                {
+                    std::swap(v, u);
+                }
+
+                // add artificial edge to edge sets again
+                // TODO: think about this
+                gamma[u].add_edge(u, v);
+                alpha[v].add_edge(u, v);
+
+                break;
             }
-            _rewind();
-
-            // now add artificial edge
-            _artificial_edges.add_edge(u, v);
-
-            // follow convention that u is the one with the smaller level
-            if (_levels[v] < _levels[u])
+            else
             {
-                std::swap(v, u);
+                // process A has finished and detected that no component breaks
+                // we have to let process B continue until it detects that, so that the BFS structure remains
+                // however, we can stop recording changes to save space
+                record_changes = false;
             }
-
-            // add artificial edge to edge sets again
-            // TODO: think about this
-            gamma[u].add_edge(u, v);
-            alpha[v].add_edge(u, v);
-
-
-            break;
         }
-        procB.advance();
+
+        procB.advance(record_changes);
     }
     // after each run, empty change history
-    // NOTE: this takes O(N) to delete all elements, only adds a constant to the total run complexity 
+    // NOTE: this takes O(N) to delete all elements, only adds a constant to the total run complexity
     _change_history = std::stack<ChangeRecord>();
 }
 

@@ -9,7 +9,7 @@
 #include <boost/graph/random.hpp>
 #include "gen.hpp"
 #include "util.hpp"
-#define MAX_RANDOM_NODES 15000
+#define MAX_RANDOM_NODES 8000
 
 using namespace boost;
 
@@ -17,8 +17,9 @@ void test_ring(mt19937 &mt)
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    gen::generate_ring(G, 8500, edge_handles);
-    std::cout << "just made it" << std::endl;
+    auto num_of_nodes = mt() % MAX_RANDOM_NODES;
+    std::cout << "Testing ring with " << num_of_nodes << " nodes." << std::endl;
+    gen::generate_ring(G, num_of_nodes, edge_handles);
 
     DynGraph DG(G);
     // pick random first edge to remove
@@ -26,19 +27,12 @@ void test_ring(mt19937 &mt)
     Vertex firstv = source(first, G);
     Vertex firstu = target(first, G);
 
-    // TODO: possible bad_alloc because of too many changes being saved in the stack
-    // especially for the first one that needs to pass all of them
-    // TODO: maybe stop recording once we know that process A has stopped so no rewinding
-    // is gonna take place
-    std::cout << "Removing first" << std::endl;
     // remove random first edge
     DG.dyn_remove_edge(first);
-    std::cout << "After remove first" << std::endl;
 
     // first edge should not break connected component
     assert(DG.query_is_connected(first) && "First edge removed broke component.");
 
-    EdgeIterator ei, eiend;
     for (auto it = edge_handles.begin(); it != edge_handles.end(); ++it)
     {
         if ((source(*it, G) == firstv && target(*it, G) == firstu) || source(*it, G) == firstu && target(*it, G) == firstv)
@@ -47,14 +41,30 @@ void test_ring(mt19937 &mt)
             continue;
         }
         DG.dyn_remove_edge(*it);
-        assert(!DG.query_is_connected(source(*it, G), target(*it, G)));
+        assert(!DG.query_is_connected(source(*it, G), target(*it, G)) && "Every subsequent edge removal should break a component.");
+    }
+}
+
+void test_line(mt19937 &mt)
+{
+    Graph G;
+    std::vector<Edge> edge_handles;
+    auto num_of_nodes = mt() % MAX_RANDOM_NODES;
+    std::cout << "Testing line with " << num_of_nodes << " nodes." << std::endl;
+    gen::generate_line(G, num_of_nodes, edge_handles);
+    DynGraph DG(G);
+
+    for (auto it = edge_handles.begin(); it != edge_handles.end(); ++it)
+    {
+        DG.dyn_remove_edge(*it);
+        assert(!DG.query_is_connected(source(*it, G), target(*it, G)) && "Every subsequent edge removal should break a component.");
     }
 }
 
 int main()
 {
     mt19937 mt(time(0));
-    std::cout << "Hello test" << std::endl;
     test_ring(mt);
+    test_line(mt);
     return 0;
 }

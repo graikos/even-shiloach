@@ -136,7 +136,7 @@ namespace my
                            std::stack<ChangeRecord> &changes_stack,
                            Vertex u, Vertex v);
 
-        void advance();
+        void advance(bool record_changes);
 
     private:
         // _changes_stack holds a history of the changes made, used to rewind the changes in case process A
