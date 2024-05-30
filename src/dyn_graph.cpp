@@ -215,7 +215,7 @@ void DynGraph::dyn_remove_edge(Edge e)
         procB.advance();
     }
     // after each run, empty change history
-    // NOTE: this takes O(N) to delete all elements
+    // NOTE: this takes O(N) to delete all elements, only adds a constant to the total run complexity 
     _change_history = std::stack<ChangeRecord>();
 }
 
