@@ -22,6 +22,7 @@ public:
     void print();
     void dyn_remove_edge(Edge e);
     bool query_is_connected(Vertex v, Vertex u);
+    bool query_is_connected(Edge e);
 
 private:
     Graph &_G;

@@ -8,15 +8,11 @@ void gen::generate_ring(Graph &G, int n, std::vector<Edge> &edge_handles)
 {
     assert(n > 0);
     add_vertex(G);
-    Edge e;
-    bool c;
     for (int i = 1; i < n; ++i)
     {
-        tie(e, c) = add_edge(i, i - 1, G);
-        edge_handles.push_back(e);
+        edge_handles.push_back(add_edge(i, i - 1, G).first);
     }
-    tie(e, c) = add_edge(0, n - 1, G);
-    edge_handles.push_back(e);
+    edge_handles.push_back(add_edge(0, n - 1, G).first);
 }
 
 void gen::generate_random(Graph &G, int n, int m, std::vector<Edge> &edge_handles, mt19937 &mt)

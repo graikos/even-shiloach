@@ -1,63 +1,37 @@
 #include <iostream>
+#include <ctime>
 #include "graph.hpp"
 #include <vector>
 #include "algo.hpp"
 #include "dyn_graph.hpp"
+#include <boost/random/mersenne_twister.hpp>
 #include "gen.hpp"
+#include "util.hpp"
 
 using namespace boost;
 
-void printGraph(Graph &G)
-{
-    VertexIterator vi, viend;
-    for (tie(vi, viend) = vertices(G); vi != viend; ++vi)
-    {
-        std::cout << "Vertex " << *vi << " : ";
-        OutEdgeIterator oei, oeiend;
-        for (tie(oei, oeiend) = out_edges(*vi, G); oei != oeiend; ++oei)
-        {
-            std::cout << "Edge: " << *oei << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
-template <typename T>
-void printVector(const std::vector<T> &vec)
-{
-    for (auto it = vec.begin(); it != vec.end(); ++it)
-    {
-        std::cout << *it << " ";
-    }
-    std::cout << std::endl;
-}
-
-template <typename T>
-void printList(const std::list<T> &list)
-{
-    for (auto it = list.begin(); it != list.end(); ++it)
-    {
-        std::cout << *it << std::endl;
-    }
-}
-
-Edge add_edge(Vertex u, Vertex v, Graph &G)
-{
-    Edge e;
-    bool c;
-    tie(e, c) = boost::add_edge(u,v,G);
-    return e;
-}
-
 int main()
 {
+    mt19937 mt(25);
     Graph G;
     std::vector<Edge> edge_handles;
-    gen::generate_line(G, 10, edge_handles);
+    // gen::generate_line(G, 10, edge_handles);
+    gen::generate_random(G, 10, 5, edge_handles, mt);
 
 
     DynGraph DG(G);
-    DG.dyn_remove_edge(edge_handles[4]);
+
+    std::cout << "Original levels" << std::endl;
+    printVector(DG._levels);
+    std::cout << "Original components" << std::endl;
+    printVector(DG._components);
+
+    Edge tbr;
+    tbr = edge_handles[4];
+
+    std::cout << "removing: " << tbr << std::endl;
+    DG.dyn_remove_edge(tbr);
+    std::cout << DG.query_is_connected(tbr) << std::endl;
     std::cout << "Levels:" << std::endl;
     printVector(DG._levels);
     std::cout << "Components:" << std::endl;

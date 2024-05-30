@@ -223,3 +223,8 @@ bool DynGraph::query_is_connected(Vertex v, Vertex u)
 {
     return _components[v] == _components[u];
 }
+
+bool DynGraph::query_is_connected(Edge e)
+{
+    return _components[source(e, _G)] == _components[target(e, _G)];
+}

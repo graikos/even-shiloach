@@ -1,7 +1,7 @@
 INCL = '../incl'
 CC = g++
 
-DEBUG ?= 0
+DEBUG ?= 1
 SANITIZE ?= 0
 
 CFLAGS = -std=c++0x
@@ -19,6 +19,9 @@ endif
 
 dyn_connected: main.o graph.o dyn_graph.o algo.o edge_set.o gen.o change_record.o
 	$(CC) $(CFLAGS) -o dyn_connected main.o graph.o dyn_graph.o algo.o edge_set.o gen.o change_record.o -I $(INCL)
+
+test: test.o graph.o dyn_graph.o algo.o edge_set.o gen.o change_record.o
+	$(CC) $(CFLAGS) -o test_dyn_connected test.o graph.o dyn_graph.o algo.o edge_set.o gen.o change_record.o -I $(INCL)
 
 main.o: ../src/main.cpp
 	$(CC) $(CFLAGS) -c $^ -I $(INCL)
@@ -41,9 +44,15 @@ gen.o: ../src/gen.cpp
 change_record.o: ../src/change_record.cpp
 	$(CC) $(CFLAGS) -c $^ -I $(INCL)
 
+test.o: ../src/test/test.cpp
+	$(CC) $(CFLAGS) -c $^ -I $(INCL)
 
 run:
 	./dyn_connected
+
+test_run:
+	./test_dyn_connected
+
 	
 clean:
-	rm -f dyn_connected *.o
+	rm -f dyn_connected test_dyn_connected *.o
