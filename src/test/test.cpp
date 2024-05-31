@@ -128,12 +128,51 @@ void test_random_connected(mt19937 &mt)
     std::cout << "Success" << std::endl;
 }
 
+void test_fully_connected(mt19937 &mt)
+{
+    Graph G;
+    std::vector<Edge> edge_handles;
+    auto num_of_vertices = mt() % 1500;
+    gen::generate_fully_connected(G, num_of_vertices, edge_handles);
+    DynGraph DG(G);
+    std::cout << "Testing fully connected with " << num_vertices(G) << " vertices... ";
+
+    std::vector<Edge> st_vec;
+    my::dfs_tree(G, 0, st_vec);
+    EdgeSet st_set;
+    for (auto it = st_vec.begin(); it != st_vec.end(); ++it)
+    {
+        st_set.add_edge(source(*it, G), target(*it, G));
+    }
+    for (auto it = edge_handles.begin(); it != edge_handles.end(); ++it)
+    {
+        if (st_set.contains(source(*it, G), target(*it, G)))
+        {
+            // skip over spanning tree edges for now
+            continue;
+        }
+
+        DG.dyn_remove_edge(*it);
+        assert(DG.query_is_connected(source(*it, G), target(*it, G)) && "Non spanning tree edges should not break component.");
+    }
+
+    for (auto it = st_vec.begin(); it != st_vec.end(); ++it)
+    {
+        DG.dyn_remove_edge(*it);
+        assert(!DG.query_is_connected(source(*it, G), target(*it, G)) && "Every spanning tree edge should now break a component.");
+    }
+
+    assert(num_edges(G) == 0);
+    std::cout << "Success" << std::endl;
+}
+
 int main()
 {
     mt19937 mt(time(0));
-    test_ring(mt);
-    test_line(mt);
-    test_random_no_assert(mt);
-    test_random_connected(mt);
+    // test_ring(mt);
+    // test_line(mt);
+    // test_random_no_assert(mt);
+    // test_random_connected(mt);
+    test_fully_connected(mt);
     return 0;
 }

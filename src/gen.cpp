@@ -30,11 +30,24 @@ void gen::generate_line(Graph &G, int n, std::vector<Edge> &edge_handles)
 {
     assert(n > 0);
     add_vertex(G);
-    Edge e;
-    bool c;
     for (int i = 1; i < n; ++i)
     {
-        tie(e, c) = add_edge(i, i - 1, G);
-        edge_handles.push_back(e);
+        edge_handles.push_back(add_edge(i, i - 1, G).first);
+    }
+}
+
+void gen::generate_fully_connected(Graph &G, int n, std::vector<Edge> &edge_handles)
+{
+    assert(n > 0);
+    for (int i = 0; i < n; ++i)
+    {
+        add_vertex(G);
+    }
+    for (int i = 0; i < n; ++i)
+    {
+        for (int j = i + 1; j < n; ++j)
+        {
+            edge_handles.push_back(add_edge(i, j, G).first);
+        }
     }
 }
