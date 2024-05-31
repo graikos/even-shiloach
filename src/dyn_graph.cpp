@@ -11,10 +11,14 @@ using namespace boost;
 
 DynGraph::DynGraph(Graph &G) : _G(G), _component_max_idx(0)
 {
-    init();
+    init(true);
+}
+DynGraph::DynGraph(Graph &G, Vertex r) : _G(G), _component_max_idx(0), _r(r)
+{
+    init(false);
 }
 
-void DynGraph::init()
+void DynGraph::init(bool random_root)
 {
 
     _levels = std::vector<int>(num_vertices(_G), -1);
@@ -24,9 +28,12 @@ void DynGraph::init()
     beta = std::vector<EdgeSet>(num_vertices(_G));
     gamma = std::vector<EdgeSet>(num_vertices(_G));
 
-    // pick random vertex as root
-    mt19937 mt(std::time(0));
-    _r = vertex(mt() % num_vertices(_G), _G);
+    if (random_root)
+    {
+        // pick random vertex as root
+        mt19937 mt(std::time(0));
+        _r = vertex(mt() % num_vertices(_G), _G);
+    }
 
     // perform initial BFS from root r
     my::bfs(_G, _r, _levels, _components, _component_max_idx, alpha, beta, gamma);
@@ -205,7 +212,6 @@ void DynGraph::dyn_remove_edge(Edge e)
                 }
 
                 // add artificial edge to edge sets again
-                // TODO: think about this
                 gamma[u].add_edge(u, v);
                 alpha[v].add_edge(u, v);
 

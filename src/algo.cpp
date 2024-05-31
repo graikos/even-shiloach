@@ -84,10 +84,11 @@ void my::dfs(const Graph &G, Vertex s, std::vector<int> &comp, int comp_val)
 bool my::dfs_scan(const Graph &G, Vertex s, Vertex t)
 {
     std::stack<Vertex> stack;
-    std::vector<bool> visited(num_vertices(G), false);
+    // use a set to avoid O(n) initializings if we're scanning small connected component
+    std::unordered_set<Vertex> visited;
 
     stack.push(s);
-    visited[s] = true;
+    visited.insert(s);
     if (s == t)
         return true;
 
@@ -100,7 +101,7 @@ bool my::dfs_scan(const Graph &G, Vertex s, Vertex t)
         {
             Vertex v = target(*ei, G);
 
-            if (!visited[v])
+            if (visited.find(v) == visited.end())
             {
                 if (v == t)
                 {
@@ -108,12 +109,40 @@ bool my::dfs_scan(const Graph &G, Vertex s, Vertex t)
                     return true;
                 }
                 stack.push(v);
-                visited[v] = true;
+                visited.insert(v);
             }
         }
     }
     // scan complete, not found
     return false;
+}
+
+void my::dfs_tree(const Graph &G, Vertex s, std::vector<Edge> &tree_edges)
+{
+    std::stack<Vertex> stack;
+    // use a set to avoid O(n) initializings if we're scanning small connected component
+    std::unordered_set<Vertex> visited;
+
+    stack.push(s);
+    visited.insert(s);
+
+    while (!stack.empty())
+    {
+        Vertex u = stack.top();
+        stack.pop();
+        OutEdgeIterator ei, eiend;
+        for (tie(ei, eiend) = out_edges(u, G); ei != eiend; ++ei)
+        {
+            Vertex v = target(*ei, G);
+
+            if (visited.find(v) == visited.end())
+            {
+                stack.push(v);
+                visited.insert(v);
+                tree_edges.push_back(*ei);
+            }
+        }
+    }
 }
 
 my::StepScanDFS::StepScanDFS(const Graph &G, Vertex s, Vertex t) : _G(G), result(false), state(my::StepScanState::Uninitialized), _s(s), _t(t), target_mode(true)

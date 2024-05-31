@@ -18,7 +18,8 @@ public:
     std::vector<EdgeSet> gamma; // TODO: move to private
 
     DynGraph(Graph &G);
-    void init();
+    DynGraph(Graph &G, Vertex r);
+    void init(bool random_root);
     void print();
     void dyn_remove_edge(Edge e);
     bool query_is_connected(Vertex v, Vertex u);

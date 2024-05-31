@@ -24,6 +24,7 @@ namespace my
 
     void dfs(const Graph &G, Vertex s, std::vector<int> &comp, int comp_val);
     bool dfs_scan(const Graph &G, Vertex s, Vertex t);
+    void dfs_tree(const Graph &G, Vertex s, std::vector<Edge> &tree_edges);
 
     enum class StepScanState
     {
@@ -161,5 +162,6 @@ namespace my
     };
 
 }
+
 
 #endif

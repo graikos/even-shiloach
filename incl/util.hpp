@@ -45,7 +45,7 @@ Edge add_edge(Vertex u, Vertex v, Graph &G)
 {
     Edge e;
     bool c;
-    tie(e, c) = boost::add_edge(u,v,G);
+    tie(e, c) = boost::add_edge(u, v, G);
     return e;
 }
 
