@@ -14,7 +14,7 @@
 #include <ctime>
 #include <ratio>
 
-#define ITERATIONS 1000
+#define ITERATIONS 100
 
 using namespace boost;
 
@@ -67,8 +67,8 @@ std::vector<std::vector<std::vector<double>>> bench_line_q_queries(std::vector<i
                 }
 
                 std::chrono::duration<double, std::milli> dur(0);
-                auto t1 = std::chrono::high_resolution_clock::now();
                 Edge e = edge(current, current - 1, G).first;
+                auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
                 DG.dyn_remove_edge(e);
                 // save time elapsed to dynamically restructure
@@ -95,8 +95,8 @@ std::vector<std::vector<std::vector<double>>> bench_line_q_queries(std::vector<i
 
 int main()
 {
-    std::vector<int> cases = {2048};
+    std::vector<int> cases = {256};
     auto res = bench_line_q_queries(cases);
-    save_bench_to_file("line_bench", res, cases);
+    save_bench_to_file("../results/line_bench", res, cases);
     return 0;
 }
