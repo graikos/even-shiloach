@@ -169,10 +169,10 @@ void test_fully_connected(mt19937 &mt)
 int main()
 {
     mt19937 mt(time(0));
-    // test_ring(mt);
-    // test_line(mt);
-    // test_random_no_assert(mt);
-    // test_random_connected(mt);
+    test_ring(mt);
+    test_line(mt);
+    test_random_no_assert(mt);
+    test_random_connected(mt);
     test_fully_connected(mt);
     return 0;
 }

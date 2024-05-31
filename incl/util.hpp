@@ -2,6 +2,8 @@
 #define MY_UTIL_HPP
 
 #include "graph.hpp"
+#include <fstream>
+#include <iostream>
 #include <vector>
 #include <list>
 
@@ -47,6 +49,23 @@ Edge add_edge(Vertex u, Vertex v, Graph &G)
     bool c;
     tie(e, c) = boost::add_edge(u, v, G);
     return e;
+}
+
+void save_bench_to_file(const std::string &filename, const std::vector<std::vector<std::vector<double>>> &vec,
+                        const std::vector<int> &cases)
+{
+    for (auto c = 0; c < cases.size(); ++c)
+    {
+        std::ofstream file;
+        std::stringstream sstm;
+        sstm << filename << "_" << cases[c] << ".dat";
+        file.open(sstm.str(), std::ios::out | std::ios::trunc);
+        for (auto q = vec[c].begin(); q != vec[c].end(); ++q)
+        {
+            file << q->at(0) << "," << q->at(1) << std::endl;
+        }
+        file.close();
+    }
 }
 
 #endif

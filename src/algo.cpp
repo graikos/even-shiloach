@@ -284,7 +284,7 @@ void my::StepDetectBreak::advance()
             if (!sdfs1.result)
             {
                 // if it has not found the other end, this branch has found the small component, return so we can change
-                small_component = sdfs1.component;
+                small_component = std::move(sdfs1.component);
                 component_breaks = true;
             }
             // NOTE: if it did find the other edge, the component_breaks will be the initial value (false)
@@ -304,7 +304,7 @@ void my::StepDetectBreak::advance()
         {
             if (!sdfs2.result)
             {
-                small_component = sdfs2.component;
+                small_component = std::move(sdfs2.component);
                 component_breaks = true;
             }
             state = StepDetectBreakState::Finished;

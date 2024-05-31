@@ -55,4 +55,4 @@ test_run:
 
 	
 clean:
-	rm -f dyn_connected test_dyn_connected *.o
+	rm -f dyn_connected test_dyn_connected *.o *.dat
