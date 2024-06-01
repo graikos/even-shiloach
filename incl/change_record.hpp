@@ -10,7 +10,6 @@ enum class ChangeRecordType
     Remove,
     AlphaBetaMove,
     RestoreBeta,
-    BetaGammaMove,
     GammaEmptyMove,
 };
 

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <boost/graph/graphviz.hpp>
 
 using namespace boost;
 
@@ -66,6 +67,14 @@ void save_bench_to_file(const std::string &filename, const std::vector<std::vect
         }
         file.close();
     }
+}
+
+void save_graphviz_file(const std::string &filename, const Graph &G)
+{
+    std::ofstream file;
+    file.open(filename, std::ios::out | std::ios::trunc);
+    write_graphviz(file, G);
+    file.close();
 }
 
 #endif

@@ -521,9 +521,8 @@ void my::StepDetectNotBreak::advance(bool record_changes)
         _gamma[_current_w].clear();
         if (record_changes)
         {
-            // no need to keep track of old EdgeSet for the change record for this move
-            _changes_stack.push(ChangeRecord(ChangeRecordType::BetaGammaMove, _current_w, _current_w, 0));
-            // also add the emptying of gamma(w) to the changes
+            // NOTE: BetaGammaMoved not used any more, see _rewind notes
+            // add the emptying of gamma(w) to the changes
             _changes_stack.push(ChangeRecord(ChangeRecordType::GammaEmptyMove, _current_w, _current_w, 0));
         }
 

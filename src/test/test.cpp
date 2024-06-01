@@ -1,7 +1,9 @@
 #include <iostream>
+#include <chrono>
 #include <ctime>
 #include "graph.hpp"
 #include <cassert>
+#include <fstream>
 #include <vector>
 #include "algo.hpp"
 #include "dyn_graph.hpp"
@@ -12,8 +14,8 @@
 #include "edge_set.hpp"
 #include "gen.hpp"
 #include "util.hpp"
-#define MAX_RANDOM_VERTICES 8000
-#define MAX_RANDOM_EDGES 16000
+#define MAX_RANDOM_VERTICES 3000
+#define MAX_RANDOM_EDGES 8000
 
 using namespace boost;
 
@@ -21,7 +23,7 @@ void test_ring(mt19937 &mt)
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES;
+    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES + 1;
     std::cout << "Testing ring with " << num_of_vertices << " vertices... ";
     gen::generate_ring(G, num_of_vertices, edge_handles);
 
@@ -55,8 +57,8 @@ void test_line(mt19937 &mt)
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES;
-    std::cout << "Testing line with " << num_of_vertices << " vertices... ";
+    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES + 1;
+    std::cout << "Testing line with " << num_of_vertices << " vertices... " << std::flush;
     gen::generate_line(G, num_of_vertices, edge_handles);
     DynGraph DG(G);
 
@@ -73,9 +75,9 @@ void test_random_no_assert(mt19937 &mt)
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES;
-    auto num_of_edges = mt() % MAX_RANDOM_EDGES;
-    std::cout << "Testing random no-fail with " << num_of_vertices << " vertices and " << num_of_edges << " edges... ";
+    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES + 1;
+    auto num_of_edges = mt() % MAX_RANDOM_EDGES + 1;
+    std::cout << "Testing random no-fail with " << num_of_vertices << " vertices and " << num_of_edges << " edges... " << std::flush;
     gen::generate_random(G, num_of_vertices, num_of_edges, edge_handles, mt);
     DynGraph DG(G);
 
@@ -92,10 +94,19 @@ void test_random_connected(mt19937 &mt)
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES;
-    auto num_of_edges = mt() % MAX_RANDOM_EDGES;
+    auto num_of_vertices = mt() % MAX_RANDOM_VERTICES + 1;
+    auto num_of_edges = mt() % MAX_RANDOM_EDGES + 1;
+
     gen::generate_random(G, num_of_vertices, num_of_edges, edge_handles, mt);
     make_connected(G);
+
+    // make_connected might have added edges, so save edge handles here
+    EdgeIterator ei, eiend;
+    edge_handles.clear();
+    for (tie(ei, eiend) = edges(G); ei != eiend; ++ei)
+    {
+        edge_handles.push_back(*ei);
+    }
     DynGraph DG(G);
     std::cout << "Testing random connected with " << num_vertices(G) << " vertices and " << num_edges(G) << " edges... ";
 
@@ -132,7 +143,7 @@ void test_fully_connected(mt19937 &mt)
 {
     Graph G;
     std::vector<Edge> edge_handles;
-    auto num_of_vertices = mt() % 1500;
+    auto num_of_vertices = mt() % 1500 + 1;
     gen::generate_fully_connected(G, num_of_vertices, edge_handles);
     DynGraph DG(G);
     std::cout << "Testing fully connected with " << num_vertices(G) << " vertices... ";
@@ -168,7 +179,17 @@ void test_fully_connected(mt19937 &mt)
 
 int main()
 {
-    mt19937 mt(time(0));
+    // Get the current timestamp using high_resolution_clock
+    auto now = std::chrono::high_resolution_clock::now();
+
+    // Convert the timestamp to nanoseconds since epoch
+    auto duration = now.time_since_epoch();
+    auto seed = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+    // auto seed = 1717185575863284000;
+    mt19937 mt(seed);
+
+    std::cout << "Seed: " << seed << std::endl;
+
     test_ring(mt);
     test_line(mt);
     test_random_no_assert(mt);

@@ -112,16 +112,6 @@ void DynGraph::_rewind()
             (*(s[record.primary_set]))[record.v].add_edge(record.v, record.u);
             break;
 
-        case ChangeRecordType::RestoreBeta:
-
-            // this is restoring beta(w), which is invalidate with the move inside step 5
-            // in step 5 beta(w) is moved to alpha(w). During rewinding, if we only rewind
-            // alpha to its old set, beta(w) will be left invalid, with a possibility of not being
-            // overwritten, if execution does not make it to step 7. It is guaranteed due to the order of the
-            // stack that the next entry will restore alpha(w), so no problem with this move
-            beta[record.v] = std::move(alpha[record.v]);
-
-            break;
 
         case ChangeRecordType::AlphaBetaMove:
 
@@ -130,25 +120,27 @@ void DynGraph::_rewind()
 
             break;
 
-        case ChangeRecordType::BetaGammaMove:
+        case ChangeRecordType::RestoreBeta:
+            // in that case, this will move alpha again, which will have already been moved
 
-            // undo the beta(w) <- gamma(w)
-            // to do that, use the current alpha(w)
-            // This will work because we use a stack, meaning we traverse the avalanche steps in reverse
-            // This means that we have not yet changed alpha(w) back to the old one, meaning at this step
-            // alpha(w) holds the old beta(w) still.
-            // Also, there is the issue of moving alpha(w) to beta(w), thus invalidating the current alpha(w),
-            // running the risk of leaving the alpha(w) set as undefined in the new version of the dyn_graph.
-            // This CANNOT happen because there is nothing between step 7 to step 5 that could break the execution of
-            // process B, thus leaving alpha(w) unchanged, which will happen at step 5.
-            // Also, in step 6 no changes are made to alpha(w).
-            // Essentially, if we find ourselves in this step, rewinding the beta(w) <- gamma(w) move, we will certainly
-            // rewind the alpha(w) <- beta(w) move too, thus setting the momentarily undefined alpha(w) back to its
-            // old version.
+            // this is restoring beta(w), which is invalidate with the move inside step 5
+            // in step 5 beta(w) is moved to alpha(w). During rewinding, if we only rewind
+            // alpha to its old set, beta(w) will be left invalid, with a possibility of not being
+            // overwritten, if execution does not make it to step 7. It is guaranteed due to the order of the
+            // stack that the next entry will restore alpha(w), so no problem with this move
+
+            // NOTE: IF the execution stops after step 7, the following problem will occur:
+            // beta(w) will be restored in the betagammamove restore. Then this restoree will be called,
+            // which will be the same as teh betagammamove restore. And this will overwrite beta[v] with the
+            // already-moved alpha, so beta will be undefined again. This is why BetaGammaMove will be removed.
+            // In step 6, beta(w) is not used, so a rewind of step 5 is guaranteed to run after rewinding step 7, so this will run
+            // too and beta will eventually be restored
+
 
             beta[record.v] = std::move(alpha[record.v]);
 
             break;
+
 
         case ChangeRecordType::GammaEmptyMove:
 
