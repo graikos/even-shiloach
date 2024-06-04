@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import sys
+import pandas as pd
 
 
 def main():
@@ -12,15 +14,27 @@ def main():
             dyn_list.append(s[0])
             dfs_list.append(s[1])
 
+    dyn_list_np = np.array(dyn_list)
+    dfs_list_np = np.array(dfs_list)
+
+    df = pd.DataFrame({"dyn": dyn_list_np, "dfs": dfs_list_np})
+    df["dyn_roll"] = df["dyn"].rolling(window=15).mean()
+    df["dfs_roll"] = df["dfs"].rolling(window=15).mean()
+
 
     # Create a figure and an axis
     fig, ax = plt.subplots()
 
-    # Plot the first set of data
-    ax.plot(dyn_list, label="Dynamic structure")
+    if len(sys.argv) < 4:
+        # Plot the first set of data
+        ax.plot(dyn_list, label="Dynamic structure", color="#d0d5ed")
+
+        # Plot the second set of data
+        ax.plot(dfs_list, label="DFS query", color="#edd0d0")
 
     # Plot the second set of data
-    ax.plot(dfs_list, label="DFS query")
+    ax.plot(df["dyn_roll"], label="Dynamic structure (Rolling Avg.)")
+    ax.plot(df["dfs_roll"], label="DFS query (Rolling Avg.)")
 
     ax.set_yscale('log')
 

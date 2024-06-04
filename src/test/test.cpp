@@ -14,7 +14,7 @@
 #include "edge_set.hpp"
 #include "gen.hpp"
 #include "util.hpp"
-#define MAX_RANDOM_VERTICES 3000
+#define MAX_RANDOM_VERTICES 3500
 #define MAX_RANDOM_EDGES 8000
 
 using namespace boost;

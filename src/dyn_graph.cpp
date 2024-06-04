@@ -45,30 +45,10 @@ void DynGraph::init(bool random_root)
         if (_levels[i] < 0)
         {
             // the root of this new component will be artificially connected to the random root
-            // will be on level 1 and an artificial edge will be added
+            // will be on level 1
             my::bfs(_G, s, _levels, _components, ++_component_max_idx, alpha, beta, gamma, 1);
-            _add_artificial_edge(_r, i);
-            // also add artifical edges to appropriate edge sets
-            alpha[i].add_edge(_r, i);
-            gamma[_r].add_edge(_r, i);
         }
     }
-}
-
-void DynGraph::_add_artificial_edge(Vertex v, Vertex u)
-{
-    // artificial edges will be kept in a hash map, with key the min of the two and value the max of the two
-    _artificial_edges.add_edge(u, v);
-}
-
-void DynGraph::_remove_artificial_edge(Vertex v, Vertex u)
-{
-    _artificial_edges.remove_edge(v, u);
-}
-
-bool DynGraph::_check_if_artificially_connected(Vertex v, Vertex u)
-{
-    return _artificial_edges.contains(v, u);
 }
 
 void DynGraph::print()
@@ -183,26 +163,13 @@ void DynGraph::dyn_remove_edge(Edge e)
             if (procA.component_breaks)
             {
                 // here process A has detected a component breaking
-                // we need to update components, rewind process B changes, and add artifical edge
+                // we need to update components, rewind process B changes
                 ++_component_max_idx;
                 for (auto it = procA.small_component.begin(); it != procA.small_component.end(); ++it)
                 {
                     _components[*it] = _component_max_idx;
                 }
                 _rewind();
-
-                // now add artificial edge
-                _artificial_edges.add_edge(u, v);
-
-                // follow convention that u is the one with the smaller level
-                if (_levels[v] < _levels[u])
-                {
-                    std::swap(v, u);
-                }
-
-                // add artificial edge to edge sets again
-                gamma[u].add_edge(u, v);
-                alpha[v].add_edge(u, v);
 
                 break;
             }

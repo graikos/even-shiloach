@@ -69,6 +69,23 @@ void save_bench_to_file(const std::string &filename, const std::vector<std::vect
     }
 }
 
+void save_bench_to_file(const std::string &filename, const std::vector<std::vector<std::vector<double>>> &vec,
+                        const std::vector<std::pair<int, int>> &cases)
+{
+    for (auto c = 0; c < cases.size(); ++c)
+    {
+        std::ofstream file;
+        std::stringstream sstm;
+        sstm << filename << "_" << cases[c].first << "_" << cases[c].second << ".dat";
+        file.open(sstm.str(), std::ios::out | std::ios::trunc);
+        for (auto q = vec[c].begin(); q != vec[c].end(); ++q)
+        {
+            file << q->at(0) << "," << q->at(1) << std::endl;
+        }
+        file.close();
+    }
+}
+
 // void save_graphviz_file(const std::string &filename, const Graph &G)
 // {
 //     std::ofstream file;
