@@ -71,12 +71,14 @@ std::vector<std::vector<std::vector<double>>> bench_line_q_queries(std::vector<i
                 auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
                 DG.dyn_remove_edge(e);
+                auto t2 = std::chrono::high_resolution_clock::now();
                 // save time elapsed to dynamically restructure
-                res[c][q][0] += std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - t1).count();
+                res[c][q][0] += std::chrono::duration<double, std::milli>(t2 - t1).count();
                 bool dfs_found = false;
                 t1 = std::chrono::high_resolution_clock::now();
                 dfs_found = my::dfs_scan(G, source(e, G), target(e, G));
-                res[c][q][1] += std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - t1).count();
+                t2 = std::chrono::high_resolution_clock::now();
+                res[c][q][1] += std::chrono::duration<double, std::milli>(t2 - t1).count();
                 // make sure correct results are returned
                 assert((DG.query_is_connected(source(e, G), target(e, G)) == dfs_found));
             }
@@ -95,7 +97,7 @@ std::vector<std::vector<std::vector<double>>> bench_line_q_queries(std::vector<i
 
 int main()
 {
-    std::vector<int> cases = {256};
+    std::vector<int> cases = {128};
     auto res = bench_line_q_queries(cases);
     save_bench_to_file("../results/line_bench", res, cases);
     return 0;

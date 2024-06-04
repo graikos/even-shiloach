@@ -112,7 +112,6 @@ void DynGraph::_rewind()
             (*(s[record.primary_set]))[record.v].add_edge(record.v, record.u);
             break;
 
-
         case ChangeRecordType::AlphaBetaMove:
 
             // undo the alpha(w) <- beta(w)
@@ -136,11 +135,9 @@ void DynGraph::_rewind()
             // In step 6, beta(w) is not used, so a rewind of step 5 is guaranteed to run after rewinding step 7, so this will run
             // too and beta will eventually be restored
 
-
             beta[record.v] = std::move(alpha[record.v]);
 
             break;
-
 
         case ChangeRecordType::GammaEmptyMove:
 
@@ -222,7 +219,10 @@ void DynGraph::dyn_remove_edge(Edge e)
     }
     // after each run, empty change history
     // NOTE: this takes O(N) to delete all elements, only adds a constant to the total run complexity
-    _change_history = std::stack<ChangeRecord>();
+    if (!_change_history.empty())
+    {
+        _change_history = std::stack<ChangeRecord>();
+    }
 }
 
 bool DynGraph::query_is_connected(Vertex v, Vertex u)
