@@ -4,30 +4,30 @@ import sys
 
 def main():
     filename = sys.argv[1]
-    dyn_list = []
-    dfs_list = []
+    meas = []
+    first = True
+    cases = []
     with open(filename, "r") as f:
         for line in f.readlines():
-            s = list(map(lambda x: float(x), line.split(",")))
-            dyn_list.append(s[0])
-            dfs_list.append(s[1])
+            if first:
+                cases = [int(x) for x in line.split(",")[:-1]]
+                first = False
+                continue
 
+            meas.append(float(line))
 
     # Create a figure and an axis
     fig, ax = plt.subplots()
 
     # Plot the first set of data
-    ax.plot(dyn_list, label="Dynamic structure")
+    ax.plot(cases, meas, label="Total time to remove all edges")
 
-    # Plot the second set of data
-    ax.plot(dfs_list, label="DFS query")
-
-    ax.set_yscale('log')
+    # ax.set_yscale("log")
 
     # Add a title and labels
     ax.set_title(sys.argv[2])
-    ax.set_xlabel("X-axis")
-    ax.set_ylabel("Y-axis")
+    ax.set_xlabel("Number of vertices (N)")
+    ax.set_ylabel("Time (ms)")
 
     # Add a legend
     ax.legend()

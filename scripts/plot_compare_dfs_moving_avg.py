@@ -40,8 +40,8 @@ def main():
 
     # Add a title and labels
     ax.set_title(sys.argv[2])
-    ax.set_xlabel("X-axis")
-    ax.set_ylabel("Y-axis")
+    ax.set_xlabel("Time (ms)")
+    ax.set_ylabel("Edges removed (queries)")
 
     # Add a legend
     ax.legend()

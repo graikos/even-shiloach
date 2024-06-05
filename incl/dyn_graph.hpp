@@ -24,6 +24,8 @@ public:
     bool query_is_connected(Vertex v, Vertex u);
     bool query_is_connected(Edge e);
 
+    Vertex get_root();
+
 private:
     Graph &_G;
     Vertex _r;

@@ -86,6 +86,37 @@ void save_bench_to_file(const std::string &filename, const std::vector<std::vect
     }
 }
 
+void save_worst_case_to_file(const std::string &filename, const std::vector<double> &vec,
+                             const std::vector<int> &cases)
+{
+    std::ofstream file;
+    std::stringstream sstm;
+    sstm << filename << ".dat";
+    file.open(sstm.str(), std::ios::out | std::ios::trunc);
+    for (auto c = cases.begin(); c!= cases.end(); ++c)
+    {
+        file << *c << ",";
+    }
+    file << std::endl;
+    for (auto q = vec.begin(); q != vec.end(); ++q)
+    {
+        file << *q << std::endl;
+    }
+    file.close();
+}
+
+std::vector<int> powers_of_two(int num, int start_with=1)
+{
+    std::vector<int> p(num);
+    int a = start_with;
+    for (int i =0; i < num; ++i)
+    {
+        p[i] = a;
+        a *= 2;
+    }
+    return p;
+}
+
 // void save_graphviz_file(const std::string &filename, const Graph &G)
 // {
 //     std::ofstream file;

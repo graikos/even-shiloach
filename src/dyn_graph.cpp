@@ -49,6 +49,7 @@ void DynGraph::init(bool random_root)
             my::bfs(_G, s, _levels, _components, ++_component_max_idx, alpha, beta, gamma, 1);
         }
     }
+    std::cout << "just init" << std::endl;
 }
 
 void DynGraph::print()
@@ -156,6 +157,7 @@ void DynGraph::dyn_remove_edge(Edge e)
     {
         if (procA.state != my::StepDetectBreakState::Finished)
         {
+            std::cout << "Advancing A" << std::endl;
             procA.advance();
         }
         else
@@ -200,4 +202,10 @@ bool DynGraph::query_is_connected(Vertex v, Vertex u)
 bool DynGraph::query_is_connected(Edge e)
 {
     return _components[source(e, _G)] == _components[target(e, _G)];
+}
+
+
+Vertex DynGraph::get_root()
+{
+    return _r;
 }
