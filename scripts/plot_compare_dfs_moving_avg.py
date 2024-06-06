@@ -22,32 +22,36 @@ def main():
     df["dfs_roll"] = df["dfs"].rolling(window=15).mean()
 
 
-    # Create a figure and an axis
+    # create a figure and an axis
     fig, ax = plt.subplots()
 
     if len(sys.argv) < 4:
-        # Plot the first set of data
+        # plot the first set of data
         ax.plot(dyn_list, label="Dynamic structure", color="#d0d5ed")
 
-        # Plot the second set of data
+        # plot the second set of data
         ax.plot(dfs_list, label="DFS query", color="#edd0d0")
 
-    # Plot the second set of data
+    # plot the second set of data
     ax.plot(df["dyn_roll"], label="Dynamic structure (Rolling Avg.)")
     ax.plot(df["dfs_roll"], label="DFS query (Rolling Avg.)")
 
     ax.set_yscale('log')
 
-    # Add a title and labels
+    # add a title and labels
     ax.set_title(sys.argv[2])
-    ax.set_xlabel("Time (ms)")
-    ax.set_ylabel("Edges removed (queries)")
+    ax.set_ylabel("Time (ms)")
+    ax.set_xlabel("Edges removed (queries)")
 
-    # Add a legend
+    # add a legend
     ax.legend()
 
-    # Show the plot
+    fig = plt.gcf()
+
+    fig.savefig(filename[:-4] + ".png")
+    # show the plot
     plt.show()
+
 
 
 if __name__ == "__main__":

@@ -46,8 +46,10 @@ void test_ring(mt19937 &mt)
             // skip the already removed one
             continue;
         }
+        Vertex src = source(*it, G);
+        Vertex trgt = target(*it, G);
         DG.dyn_remove_edge(*it);
-        assert(!DG.query_is_connected(source(*it, G), target(*it, G)) && "Every subsequent edge removal should break a component.");
+        assert(!DG.query_is_connected(src, trgt) && "Every subsequent edge removal should break a component.");
     }
     assert(num_edges(G) == 0);
     std::cout << "Success" << std::endl;
@@ -64,8 +66,10 @@ void test_line(mt19937 &mt)
 
     for (auto it = edge_handles.begin(); it != edge_handles.end(); ++it)
     {
+        Vertex src = source(*it, G);
+        Vertex trgt = target(*it, G);
         DG.dyn_remove_edge(*it);
-        assert(!DG.query_is_connected(source(*it, G), target(*it, G)) && "Every subsequent edge removal should break a component.");
+        assert(!DG.query_is_connected(src, trgt) && "Every subsequent edge removal should break a component.");
     }
     assert(num_edges(G) == 0);
     std::cout << "Success" << std::endl;
@@ -83,8 +87,10 @@ void test_random_no_assert(mt19937 &mt)
 
     for (auto it = edge_handles.begin(); it != edge_handles.end(); ++it)
     {
+        Vertex src = source(*it, G);
+        Vertex trgt = target(*it, G);
         DG.dyn_remove_edge(*it);
-        DG.query_is_connected(source(*it, G), target(*it, G));
+        DG.query_is_connected(src, trgt);
     }
     assert(num_edges(G) == 0);
     std::cout << "Success" << std::endl;
@@ -125,14 +131,18 @@ void test_random_connected(mt19937 &mt)
             continue;
         }
 
+        Vertex src = source(*it, G);
+        Vertex trgt = target(*it, G);
         DG.dyn_remove_edge(*it);
-        assert(DG.query_is_connected(source(*it, G), target(*it, G)) && "Non spanning tree edges should not break component.");
+        assert(DG.query_is_connected(src, trgt) && "Non spanning tree edges should not break component.");
     }
 
     for (auto it = st_vec.begin(); it != st_vec.end(); ++it)
     {
+        Vertex src = source(*it, G);
+        Vertex trgt = target(*it, G);
         DG.dyn_remove_edge(*it);
-        assert(!DG.query_is_connected(source(*it, G), target(*it, G)) && "Every spanning tree edge should now break a component.");
+        assert(!DG.query_is_connected(src, trgt) && "Every spanning tree edge should now break a component.");
     }
 
     assert(num_edges(G) == 0);
@@ -163,14 +173,18 @@ void test_fully_connected(mt19937 &mt)
             continue;
         }
 
+        Vertex src = source(*it, G);
+        Vertex trgt = target(*it, G);
         DG.dyn_remove_edge(*it);
-        assert(DG.query_is_connected(source(*it, G), target(*it, G)) && "Non spanning tree edges should not break component.");
+        assert(DG.query_is_connected(src, trgt) && "Non spanning tree edges should not break component.");
     }
 
     for (auto it = st_vec.begin(); it != st_vec.end(); ++it)
     {
+        Vertex src = source(*it, G);
+        Vertex trgt = target(*it, G);
         DG.dyn_remove_edge(*it);
-        assert(!DG.query_is_connected(source(*it, G), target(*it, G)) && "Every spanning tree edge should now break a component.");
+        assert(!DG.query_is_connected(src, trgt) && "Every spanning tree edge should now break a component.");
     }
 
     assert(num_edges(G) == 0);

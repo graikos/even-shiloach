@@ -16,23 +16,25 @@ def main():
 
             meas.append(float(line))
 
-    # Create a figure and an axis
+    # create a figure and an axis
     fig, ax = plt.subplots()
 
-    # Plot the first set of data
+    # plot the first set of data
     ax.plot(cases, meas, label="Total time to remove all edges")
 
     # ax.set_yscale("log")
 
-    # Add a title and labels
+    # add a title and labels
     ax.set_title(sys.argv[2])
     ax.set_xlabel("Number of vertices (N)")
     ax.set_ylabel("Time (ms)")
 
-    # Add a legend
+    # add a legend
     ax.legend()
 
-    # Show the plot
+    fig = plt.gcf()
+    fig.savefig(filename[:-4] + ".png")
+    # show the plot
     plt.show()
 
 

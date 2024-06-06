@@ -12,9 +12,9 @@ class DynGraph
 public:
     std::vector<int> _levels;
     std::vector<int> _components;
-    std::vector<EdgeSet> alpha; // TODO: move to private
-    std::vector<EdgeSet> beta;  // TODO: move to private
-    std::vector<EdgeSet> gamma; // TODO: move to private
+    std::vector<EdgeSet> alpha;
+    std::vector<EdgeSet> beta;
+    std::vector<EdgeSet> gamma;
 
     DynGraph(Graph &G);
     DynGraph(Graph &G, Vertex r);
