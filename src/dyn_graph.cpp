@@ -142,6 +142,11 @@ void DynGraph::dyn_remove_edge(Edge e)
     // remove the edge from the graph, the edge is removed from the appropriate EdgeSets inside process B
     remove_edge(e, _G);
 
+    reorg_after_remove(v, u);
+}
+
+void DynGraph::reorg_after_remove(Vertex v, Vertex u)
+{
     // initialize the "parallel" processes
     my::StepDetectBreak procA(_G, u, v);
     my::StepDetectNotBreak procB(_levels, alpha, beta, gamma, _change_history, u, v);

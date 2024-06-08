@@ -21,6 +21,7 @@ public:
     void init(bool random_root);
     void print();
     void dyn_remove_edge(Edge e);
+    void reorg_after_remove(Vertex v, Vertex u);
     bool query_is_connected(Vertex v, Vertex u);
     bool query_is_connected(Edge e);
 

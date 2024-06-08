@@ -15,7 +15,7 @@
 #include <ctime>
 #include <ratio>
 
-#define ITERATIONS 50
+#define ITERATIONS 100
 
 using namespace boost;
 
@@ -71,9 +71,10 @@ std::vector<std::vector<std::vector<double>>> bench_line_q_queries(std::vector<i
                 Edge e = edge(current, current - 1, G).first;
                 Vertex src = source(e, G);
                 Vertex trgt = target(e, G);
+                remove_edge(e, G);
                 auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
-                DG.dyn_remove_edge(e);
+                DG.reorg_after_remove(trgt, src);
                 auto t2 = std::chrono::high_resolution_clock::now();
                 // save time elapsed to dynamically restructure
                 res[c][q][0] += std::chrono::duration<double, std::milli>(t2 - t1).count();
@@ -127,14 +128,14 @@ std::vector<std::vector<std::vector<double>>> bench_line_q_random_queries(std::v
 
             for (int q = 0; q < query_num; ++q)
             {
-
                 std::chrono::duration<double, std::milli> dur(0);
                 Edge e = random_edge(G, mt);
                 Vertex src = source(e, G);
                 Vertex trgt = target(e, G);
+                remove_edge(e, G);
                 auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
-                DG.dyn_remove_edge(e);
+                DG.reorg_after_remove(trgt, src);
                 auto t2 = std::chrono::high_resolution_clock::now();
                 // save time elapsed to dynamically restructure
                 res[c][q][0] += std::chrono::duration<double, std::milli>(t2 - t1).count();
@@ -193,9 +194,10 @@ std::vector<std::vector<std::vector<double>>> bench_ring_q_random_queries(std::v
                 Edge e = random_edge(G, mt);
                 Vertex src = source(e, G);
                 Vertex trgt = target(e, G);
+                remove_edge(e, G);
                 auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
-                DG.dyn_remove_edge(e);
+                DG.reorg_after_remove(trgt, src);
                 auto t2 = std::chrono::high_resolution_clock::now();
                 // save time elapsed to dynamically restructure
                 res[c][q][0] += std::chrono::duration<double, std::milli>(t2 - t1).count();
@@ -256,9 +258,10 @@ std::vector<std::vector<std::vector<double>>> bench_random_q_queries(std::vector
                 Edge e = random_edge(G, edge_mt);
                 Vertex src = source(e, G);
                 Vertex trgt = target(e, G);
+                remove_edge(e, G);
                 auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
-                DG.dyn_remove_edge(e);
+                DG.reorg_after_remove(trgt, src);
                 auto t2 = std::chrono::high_resolution_clock::now();
                 // save time elapsed to dynamically restructure
                 res[c][q][0] += std::chrono::duration<double, std::milli>(t2 - t1).count();
@@ -313,9 +316,10 @@ std::vector<std::vector<std::vector<double>>> bench_fully_connected_q_queries(st
                 Edge e = random_edge(G, mt);
                 Vertex src = source(e, G);
                 Vertex trgt = target(e, G);
+                remove_edge(e, G);
                 auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
-                DG.dyn_remove_edge(e);
+                DG.reorg_after_remove(trgt, src);
                 auto t2 = std::chrono::high_resolution_clock::now();
                 // save time elapsed to dynamically restructure
                 res[c][q][0] += std::chrono::duration<double, std::milli>(t2 - t1).count();
@@ -387,9 +391,12 @@ std::vector<double> bench_worst_process_a(std::vector<int> &cases)
 
                 std::chrono::duration<double, std::milli> dur(0);
                 Edge e = edge(current, current - 1, G).first;
+                Vertex src = source(e, G);
+                Vertex trgt = source(e, G);
+                remove_edge(e, G);
                 auto t1 = std::chrono::high_resolution_clock::now();
                 // now remove the edge
-                DG.dyn_remove_edge(e);
+                DG.reorg_after_remove(trgt, src);
                 auto t2 = std::chrono::high_resolution_clock::now();
 
                 // save total time for current case
@@ -426,9 +433,12 @@ std::vector<double> bench_worst_process_b(std::vector<int> &cases)
             std::chrono::duration<double, std::milli> dur(0);
             // remove the edge before the random root to cause worst case scenario
             Edge e = edge(DG.get_root(), (DG.get_root() - 1) % cases[c], G).first;
+            Vertex src = source(e, G);
+            Vertex trgt = target(e, G);
+            remove_edge(e, G);
             auto t1 = std::chrono::high_resolution_clock::now();
             // now remove the edge
-            DG.dyn_remove_edge(e);
+            DG.reorg_after_remove(trgt, src);
             auto t2 = std::chrono::high_resolution_clock::now();
 
             // save total time for current case
@@ -454,11 +464,11 @@ int main()
     auto res_random = bench_random_q_queries(random_cases);
     save_bench_to_file("../results/bench_random_q_queries", res_random, random_cases);
 
-    auto line_log_cases = powers_of_two(7, 256);
-    auto res_line_log = bench_line_q_random_queries(line_log_cases);
+    std::vector<int> line_log_cases = {256, 2048, 65536, 131072};
+    auto res_line_log = bench_line_q_queries(line_log_cases);
     save_bench_to_file("../results/bench_line_q_queries", res_line_log, line_log_cases);
 
-    auto line_random_cases = powers_of_two(4, 2048);
+    std::vector<int> line_random_cases = {4096, 16384};
     auto res_line_random = bench_line_q_random_queries(line_random_cases);
     save_bench_to_file("../results/bench_line_q_random_queries", res_line_random, line_random_cases);
 
@@ -466,7 +476,7 @@ int main()
     auto res_fully_conn = bench_fully_connected_q_queries(fully_conn_cases);
     save_bench_to_file("../results/bench_fully_connected_q_queries", res_fully_conn, fully_conn_cases);
 
-    std::vector<int> worst_a_cases = powers_of_two(8, 256);
+    std::vector<int> worst_a_cases = powers_of_two(10, 256);
     auto res_worst_a = bench_worst_process_a(worst_a_cases);
     save_worst_case_to_file("../results/worst_case_process_a_bench", res_worst_a, worst_a_cases);
 
